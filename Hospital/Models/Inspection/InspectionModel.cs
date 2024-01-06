@@ -1,5 +1,6 @@
 ﻿using Hospital.Models.Diagnosis;
 using Hospital.Models.Doctor;
+using Hospital.Models.Patient;
 using System.ComponentModel.DataAnnotations;
 
 namespace Hospital.Models.Inspection
@@ -7,35 +8,35 @@ namespace Hospital.Models.Inspection
     public class InspectionModel
     {
         [Required]
-        public Guid id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
-        public DateTime createTime { get; set; }
+        public DateTime CreateTime { get; set; }
 
-        public DateTime date { get; set; }
+        public DateTime Date { get; set; }
 
-        public string? anamnesis { get; set; }
+        public string? Anamnesis { get; set; }
 
-        public string? complaints { get; set; }
+        public string? Complaints { get; set; }
 
-        public string? treatment { get; set; }
+        public string? Treatment { get; set; }
 
-        public Conclusion consclusion { get; set; }
+        public Conclusion Consclusion { get; set; }
 
-        public DateTime? nextVisitDate { get; set; }
+        public DateTime? NextVisitDate { get; set; }
 
-        public DateTime? deathDate { get; set; }
+        public DateTime? DeathDate { get; set; }
 
-        public Guid? baseInspectionId { get; set; }
+        public Guid? BaseInspectionId { get; set; }
 
-        public Guid? previousInspectionId { get; set; }
+        public Guid? PreviousInspectionId { get; set; }
 
-        public PatientModel patient { get; set; }
+        public PatientModel Patient { get; set; }
 
-        public DoctorModel doctor { get; set; }
+        public DoctorModel Doctor { get; set; }
 
-        public List<DiagnosisModel>? diagnoses { get; set; }
+        public List<DiagnosisModel>? Diagnoses { get; set; }
 
-        public List<InspectionConsultationModel>? consultations { get; set; }
+        public List<InspectionConsultationModel>? Consultations { get; set; }
     }
 }

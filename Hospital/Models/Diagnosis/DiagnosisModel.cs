@@ -5,22 +5,22 @@ namespace Hospital.Models.Diagnosis
     public class DiagnosisModel
     {
         [Required]
-        public Guid id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
-        public DateTime createTime { get; set; }
-
-        [Required]
-        [MinLength(1)]
-        public string code { get; set; }
+        public DateTime CreateTime { get; set; }
 
         [Required]
         [MinLength(1)]
-        public string name { get; set; }
-
-        public string? description { get; set; }
+        public string Code { get; set; }
 
         [Required]
-        public DiagnosisType type { get; set; }
+        [MinLength(1)]
+        public string Name { get; set; }
+
+        public string? Description { get; set; }
+
+        [Required]
+        public DiagnosisType Type { get; set; }
     }
 }

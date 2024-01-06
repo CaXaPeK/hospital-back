@@ -4,8 +4,8 @@ namespace Hospital.Models.Speciality
 {
     public class SpecialtiesPagedListModel
     {
-        public List<SpecialityModel>? specialities { get; set; }
+        public List<SpecialityModel>? Specialities { get; set; }
 
-        public PageInfoModel pagination { get; set; }
+        public PageInfoModel Pagination { get; set; }
     }
 }

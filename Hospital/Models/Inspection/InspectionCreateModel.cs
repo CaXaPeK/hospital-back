@@ -8,36 +8,36 @@ namespace Hospital.Models.Inspection
     public class InspectionCreateModel
     {
         [Required]
-        public DateTime date { get; set; }
+        public DateTime Date { get; set; }
 
         [Required]
         [MinLength(1)]
         [MaxLength(5000)]
-        public string anamnesis { get; set; }
+        public string Anamnesis { get; set; }
 
         [Required]
         [MinLength(1)]
         [MaxLength(5000)]
-        public string complaints { get; set; }
+        public string Complaints { get; set; }
 
         [Required]
         [MinLength(1)]
         [MaxLength(5000)]
-        public string treatment { get; set; }
+        public string Treatment { get; set; }
 
         [Required]
-        public Conclusion conclusion { get; set; }
+        public Conclusion Conclusion { get; set; }
 
-        public DateTime? nextVisitDate { get; set; }
+        public DateTime? NextVisitDate { get; set; }
 
-        public DateTime? deathDate { get; set; }
+        public DateTime? DeathDate { get; set; }
 
-        public Guid? previousInspectionId { get; set; }
+        public Guid? PreviousInspectionId { get; set; }
 
         [Required]
         [MinLength(1)]
-        public List<DiagnosisCreateModel> diagnoses { get; set; }
+        public List<DiagnosisCreateModel> Diagnoses { get; set; }
 
-        public List<ConsultationCreateModel>? consultations { get; set; }
+        public List<ConsultationCreateModel>? Consultations { get; set; }
     }
 }

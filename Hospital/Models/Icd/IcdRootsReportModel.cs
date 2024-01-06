@@ -2,10 +2,10 @@
 {
     public class IcdRootsReportModel
     {
-        public IcdRootsReportFiltersModel filters { get; set; }
+        public IcdRootsReportFiltersModel Filters { get; set; }
 
-        public List<IcdRootsReportRecordModel>? records { get; set; }
+        public List<IcdRootsReportRecordModel>? Records { get; set; }
 
-        public int? summaryByRoot { get; set; }
+        public int? SummaryByRoot { get; set; }
     }
 }

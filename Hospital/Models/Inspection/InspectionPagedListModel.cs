@@ -4,8 +4,8 @@ namespace Hospital.Models.Inspection
 {
     public class InspectionPagedListModel
     {
-        public List<InspectionPreviewModel>? inspections { get; set; }
+        public List<InspectionPreviewModel>? Inspections { get; set; }
 
-        public PageInfoModel pagination { get; set; }
+        public PageInfoModel Pagination { get; set; }
     }
 }

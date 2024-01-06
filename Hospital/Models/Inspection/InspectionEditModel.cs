@@ -6,27 +6,27 @@ namespace Hospital.Models.Inspection
     public class InspectionEditModel
     {
         [MaxLength(5000)]
-        public string? anamnesis { get; set; }
+        public string? Anamnesis { get; set; }
 
         [Required]
         [MinLength(1)]
         [MaxLength(5000)]
-        public string complaints { get; set; }
+        public string Complaints { get; set; }
 
         [Required]
         [MinLength(1)]
         [MaxLength(5000)]
-        public string treatment { get; set; }
+        public string Treatment { get; set; }
 
         [Required]
-        public Conclusion conclusion { get; set; }
+        public Conclusion Conclusion { get; set; }
 
-        public DateTime? nextVisitDate { get; set; }
+        public DateTime? NextVisitDate { get; set; }
 
-        public DateTime? deathTime { get; set; }
+        public DateTime? DeathTime { get; set; }
 
         [Required]
         [MinLength(1)]
-        public List<DiagnosisCreateModel> diagnoses { get; set; }
+        public List<DiagnosisCreateModel> Diagnoses { get; set; }
     }
 }

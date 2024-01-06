@@ -4,12 +4,12 @@ namespace Hospital.Models.Icd
 {
     public class IcdRootsReportRecordModel
     {
-        public string? patientName { get; set; }
+        public string? PatientName { get; set; }
 
-        public DateTime patientBirthdate { get; set; }
+        public DateTime PatientBirthdate { get; set; }
 
-        public Gender gender { get; set; }
+        public Gender Gender { get; set; }
 
-        public int? visitsByRoot { get; set; }
+        public int? VisitsByRoot { get; set; }
     }
 }
