@@ -6,6 +6,6 @@ namespace Hospital.Models.General
     {
         [Required]
         [MinLength(1)]
-        public string token { get; set; }
+        public string Token { get; set; }
     }
 }

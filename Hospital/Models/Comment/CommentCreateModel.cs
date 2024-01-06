@@ -7,8 +7,8 @@ namespace Hospital.Models.Comment
         [Required]
         [MinLength(1)]
         [MaxLength(1000)]
-        public string content { get; set; }
+        public string Content { get; set; }
 
-        public Guid parentId { get; set; }
+        public Guid ParentId { get; set; }
     }
 }

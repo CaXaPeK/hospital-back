@@ -7,6 +7,6 @@ namespace Hospital.Models.Inspection
         [Required]
         [MinLength(1)]
         [MaxLength(1000)]
-        public string content { get; set; }
+        public string Content { get; set; }
     }
 }

@@ -5,13 +5,13 @@ namespace Hospital.Models.Speciality
     public class SpecialityModel
     {
         [Required]
-        public Guid id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
-        public DateTime createTime { get; set; }
+        public DateTime CreateTime { get; set; }
 
         [Required]
         [MinLength(1)]
-        public string name { get; set; }
+        public string Name { get; set; }
     }
 }

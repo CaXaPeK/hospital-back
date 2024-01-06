@@ -4,8 +4,8 @@ namespace Hospital.Models.Icd
 {
     public class Icd10SearchModel
     {
-        public List<Icd10RecordModel>? records { get; set; }
+        public List<Icd10RecordModel>? Records { get; set; }
 
-        public PageInfoModel pagination { get; set; }
+        public PageInfoModel Pagination { get; set; }
     }
 }

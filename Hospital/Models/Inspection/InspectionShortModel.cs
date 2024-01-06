@@ -6,15 +6,15 @@ namespace Hospital.Models.Inspection
     public class InspectionShortModel
     {
         [Required]
-        public Guid id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
-        public DateTime createTime { get; set; }
+        public DateTime CreateTime { get; set; }
 
         [Required]
-        public DateTime date { get; set; }
+        public DateTime Date { get; set; }
 
         [Required]
-        public DiagnosisModel diagnosis { get; set; }
+        public DiagnosisModel Diagnosis { get; set; }
     }
 }

@@ -8,11 +8,11 @@ namespace Hospital.Models.Patient
         [Required]
         [MinLength(1)]
         [MaxLength(1000)]
-        public string name { get; set; }
+        public string Name { get; set; }
 
-        public DateTime? birthday { get; set; }
+        public DateTime? Birthday { get; set; }
 
         [Required]
-        public Gender gender { get; set; }
+        public Gender Gender { get; set; }
     }
 }

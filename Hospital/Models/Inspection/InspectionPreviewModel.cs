@@ -6,38 +6,38 @@ namespace Hospital.Models.Inspection
     public class InspectionPreviewModel
     {
         [Required]
-        public Guid id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
-        public DateTime createTime { get; set; }
+        public DateTime CreateTime { get; set; }
 
-        public Guid? previousId { get; set; }
-
-        [Required]
-        public DateTime date { get; set; }
+        public Guid? PreviousId { get; set; }
 
         [Required]
-        public Conclusion conclusion { get; set; }
+        public DateTime Date { get; set; }
 
         [Required]
-        public Guid doctorId { get; set; }
+        public Conclusion Conclusion { get; set; }
 
         [Required]
-        [MinLength(1)]
-        public string doctor { get; set; }
-
-        [Required]
-        public Guid patientId { get; set; }
+        public Guid DoctorId { get; set; }
 
         [Required]
         [MinLength(1)]
-        public string patient { get; set; }
+        public string Doctor { get; set; }
 
         [Required]
-        public DiagnosisModel diagnosis { get; set; }
+        public Guid PatientId { get; set; }
 
-        public bool hasChain { get; set; }
+        [Required]
+        [MinLength(1)]
+        public string Patient { get; set; }
 
-        public bool hasNested { get; set; }
+        [Required]
+        public DiagnosisModel Diagnosis { get; set; }
+
+        public bool HasChain { get; set; }
+
+        public bool HasNested { get; set; }
     }
 }
