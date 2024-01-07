@@ -59,6 +59,9 @@ namespace Hospital
                         new string[]{}
                     }
                 });
+
+                var filePath = Path.Combine(System.AppContext.BaseDirectory, "MyApi.xml");
+                option.IncludeXmlComments(filePath);
             });
 
             var app = builder.Build();
