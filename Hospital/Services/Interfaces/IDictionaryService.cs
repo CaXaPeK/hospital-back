@@ -8,5 +8,7 @@ namespace Hospital.Services.Interfaces
         Task<SpecialtiesPagedListModel> GetSpecialitiesList(string? name, int page, int size);
 
         Task<List<Icd10RecordModel>> GetRootDiagnoses();
+
+        Task<Icd10SearchModel> GetDiagnoses(string? request, int page, int size);
     }
 }
