@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Hospital.Migrations
 {
-    [DbContext(typeof(IcdDbContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20240106102813_DateTimeToDateOnly")]
     partial class DateTimeToDateOnly
     {

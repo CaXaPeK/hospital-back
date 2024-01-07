@@ -13,17 +13,17 @@ namespace Hospital
             var builder = WebApplication.CreateBuilder(args);
 
             var connection = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContext<IcdDbContext>(options => options.UseNpgsql(connection));
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connection));
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddHostedService<IcdDataFiller>();
+            builder.Services.AddHostedService<DictionaryDataFiller>();
 
             var app = builder.Build();
             using (var scope = app.Services.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<IcdDbContext>();
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 db.Database.Migrate();
             }
 

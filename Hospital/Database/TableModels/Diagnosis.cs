@@ -13,6 +13,9 @@ namespace Hospital.Database.TableModels
 
         public DateOnly? Date { get; set; }
 
+        [Required]
+        public DateTime CreateDate { get; set; }
+
         public Guid? ParentId { get; set; }
 
         [Required]
@@ -34,11 +37,12 @@ namespace Hospital.Database.TableModels
         [MinLength(1)]
         public string RootCode { get; set; }
 
-        public Diagnosis(bool actual, int? addlCode, DateOnly? date, Guid? parentId, string mkbCode, string mkbName, string recCode, Guid id, string rootCode)
+        public Diagnosis(bool actual, int? addlCode, DateOnly? date, DateTime createDate, Guid? parentId, string mkbCode, string mkbName, string recCode, Guid id, string rootCode)
         {
             Actual = actual;
             AddlCode = addlCode;
             Date = date;
+            CreateDate = createDate;
             ParentId = parentId;
             MkbCode = mkbCode;
             MkbName = mkbName;

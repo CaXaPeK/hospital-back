@@ -4,11 +4,13 @@ using System;
 
 namespace Hospital.Database
 {
-    public class IcdDbContext : DbContext
+    public class AppDbContext : DbContext
     {
-        public IcdDbContext(DbContextOptions<IcdDbContext> options) : base(options) { }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Diagnosis> Diagnoses { get; set; }
+
+        public DbSet<Speciality> Specialities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
