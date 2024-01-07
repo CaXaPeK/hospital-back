@@ -3,6 +3,7 @@ using System;
 using Hospital.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,10 +11,12 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Hospital.Migrations
 {
-    [DbContext(typeof(IcdDbContext))]
-    partial class IcdDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20240106155705_Specialities")]
+    partial class Specialities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,6 +36,9 @@ namespace Hospital.Migrations
 
                     b.Property<int?>("AddlCode")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateOnly?>("Date")
                         .HasColumnType("date");
@@ -61,6 +67,24 @@ namespace Hospital.Migrations
                     b.HasIndex("Id");
 
                     b.ToTable("Diagnoses");
+                });
+
+            modelBuilder.Entity("Hospital.Database.TableModels.Speciality", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Specialities");
                 });
 #pragma warning restore 612, 618
         }

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Hospital.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240105151025_Init")]
-    partial class Init
+    [Migration("20240106151433_DiagnosisCreateDate")]
+    partial class DiagnosisCreateDate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,8 +37,11 @@ namespace Hospital.Migrations
                     b.Property<int?>("AddlCode")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("Date")
+                    b.Property<DateTime>("CreateDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateOnly?>("Date")
+                        .HasColumnType("date");
 
                     b.Property<string>("MkbCode")
                         .IsRequired()

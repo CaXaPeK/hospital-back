@@ -1,12 +1,12 @@
 ﻿using Hospital.Database.TableModels;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace Hospital.Database
+namespace Hospital.Database.Icd
 {
     public class IcdCsvParser
     {
         public IcdCsvParser()
-        { 
+        {
             LoadedDiagnoses = new List<string>();
         }
 
@@ -34,8 +34,9 @@ namespace Hospital.Database
                 List<string> attributes = line.Split(';').ToList();
 
                 bool actual = attributes[0] == "1" ? true : false;
-                int? addlCode = attributes[1] == "" ? null : Int32.Parse(attributes[1]);
+                int? addlCode = attributes[1] == "" ? null : int.Parse(attributes[1]);
                 DateOnly? date = attributes[2] == "" ? null : DateOnly.ParseExact(attributes[2].Trim('\"'), "dd.MM.yyyy", null);
+                DateTime createDate = DateTime.UtcNow;
                 Guid? parentId = attributes[3] == "" ? null : new Guid(attributes[3].Trim('\"'));
                 string mkbCode = attributes[4].Trim('\"');
                 string mkbName = attributes[5].Trim('\"');
@@ -43,7 +44,7 @@ namespace Hospital.Database
                 Guid id = new Guid(attributes[7].Trim('\"'));
                 string rootCode = attributes[8].Trim('\"');
 
-                diagnoses.Add(new Diagnosis(actual, addlCode, date, parentId, mkbCode, mkbName, recCode, id, rootCode));
+                diagnoses.Add(new Diagnosis(actual, addlCode, date, createDate, parentId, mkbCode, mkbName, recCode, id, rootCode));
             }
 
             return diagnoses;
@@ -52,7 +53,7 @@ namespace Hospital.Database
         private int ParentId(string line)
         {
             string value = line.Split(';')[3];
-            return value == "" ? 0 : Int32.Parse(value);
+            return value == "" ? 0 : int.Parse(value);
         }
 
         private string MkbCode(string line)
@@ -63,7 +64,7 @@ namespace Hospital.Database
         private int Id(string line)
         {
             string value = line.Split(';')[7];
-            return value == "" ? 0 : Int32.Parse(value);
+            return value == "" ? 0 : int.Parse(value);
         }
 
         private void AddRootCodes(List<string> lines)
@@ -88,7 +89,7 @@ namespace Hospital.Database
                 lines[i] += ";" + MkbCode(lines[j]);
 
                 Console.SetCursorPosition(0, Console.CursorTop);
-                Console.Write("Adding root codes... " + Math.Round(((double)i / ((double)lines.Count - 1)) * 100) + "%");
+                Console.Write("Adding root codes... " + Math.Round(i / ((double)lines.Count - 1) * 100) + "%");
             }
 
             Console.SetCursorPosition(0, Console.CursorTop);
@@ -122,7 +123,7 @@ namespace Hospital.Database
                 lines[i] = newLine;
 
                 Console.SetCursorPosition(0, Console.CursorTop);
-                Console.Write("Replacing IDs... " + Math.Round(((double)i / ((double)lines.Count - 1)) * 100) + "%");
+                Console.Write("Replacing IDs... " + Math.Round(i / ((double)lines.Count - 1) * 100) + "%");
             }
 
             Console.SetCursorPosition(0, Console.CursorTop);
@@ -139,7 +140,7 @@ namespace Hospital.Database
                     i--;
 
                     Console.SetCursorPosition(0, Console.CursorTop);
-                    Console.Write("Removing unactual diagnoses... " + Math.Round(((double)i / ((double)lines.Count - 1)) * 100) + "%");
+                    Console.Write("Removing unactual diagnoses... " + Math.Round(i / ((double)lines.Count - 1) * 100) + "%");
                 }
             }
 
