@@ -45,5 +45,20 @@ namespace Hospital.Controllers
                     new ResponseModel { Status = "Error", Message = e.Message });
             }
         }
+
+        [HttpGet("icd10/roots")]
+        public async Task<IActionResult> GetRootDiagnoses()
+        {
+            try
+            {
+                var list = await _dictionaryService.GetRootDiagnoses();
+                return Ok(list);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+        }
     }
 }

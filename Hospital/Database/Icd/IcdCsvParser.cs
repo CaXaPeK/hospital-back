@@ -19,6 +19,7 @@ namespace Hospital.Database.Icd
             Console.WriteLine("Reformatting CSV...");
 
             AddRootCodes(lines);
+            ImproveRootElementCodes(lines);
             ReplaceIds(lines);
             RemoveUnactual(lines);
             lines.RemoveAt(0);
@@ -65,6 +66,76 @@ namespace Hospital.Database.Icd
         {
             string value = line.Split(';')[7];
             return value == "" ? 0 : int.Parse(value);
+        }
+
+        private void ImproveRootElementCodes(List<string> lines)
+        {
+            Dictionary<string, string> dict = new Dictionary<string, string>();
+
+            string curGroup = "";
+            string firstCode = "";
+            string lastCode = "";
+
+            for (int i = 1; i < lines.Count; i++)
+            {
+                if (ParentId(lines[i]) == 0)
+                {
+                    if (firstCode != "")
+                    {
+                        dict.Add(curGroup, '\"' + firstCode + '-' + lastCode + '\"');
+                        Console.WriteLine(curGroup + ' ' + firstCode + '-' + lastCode);
+                    }
+
+                    curGroup = MkbCode(lines[i]);
+                    firstCode = "";
+                    lastCode = "";
+
+                    continue;
+                }
+
+                if (firstCode == "" && !MkbCode(lines[i]).Contains('-') && !MkbCode(lines[i]).Contains('.'))
+                {
+                    firstCode = MkbCode(lines[i]).Trim('\"');
+                }
+                if (!MkbCode(lines[i]).Contains('-') && !MkbCode(lines[i]).Contains('.'))
+                {
+                    lastCode = MkbCode(lines[i]).Trim('\"');
+                }
+            }
+
+            dict.Add(curGroup, firstCode + '-' + lastCode);
+            Console.WriteLine(curGroup + ' ' + firstCode + '-' + lastCode);
+            Console.ReadKey();
+
+            for (int i = 1; i < lines.Count; i++)
+            {
+                string newLine = "";
+                List<string> attributes = lines[i].Split(';').ToList();
+                if (dict.ContainsKey(attributes[4]))
+                {
+                    attributes[4] = dict[attributes[4]];
+                }
+                if (dict.ContainsKey(attributes[8]))
+                {
+                    attributes[8] = dict[attributes[8]];
+                }
+                for (int j = 0; j < attributes.Count; j++)
+                {
+                    newLine += attributes[j];
+                    if (j != attributes.Count - 1)
+                    {
+                        newLine += ";";
+                    }
+                }
+
+                lines[i] = newLine;
+
+                Console.SetCursorPosition(0, Console.CursorTop);
+                Console.Write("Improving root element codes... " + Math.Round(i / ((double)lines.Count - 1) * 100) + "%");
+            }
+
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write("Improving root element codes... DONE");
         }
 
         private void AddRootCodes(List<string> lines)
