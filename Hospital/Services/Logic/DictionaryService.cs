@@ -1,6 +1,7 @@
 ﻿using Hospital.Database;
 using Hospital.Database.TableModels;
 using Hospital.Models.General;
+using Hospital.Models.Icd;
 using Hospital.Models.Speciality;
 using Hospital.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -58,6 +59,22 @@ namespace Hospital.Services.Logic
             };
 
             return dto;
+        }
+
+        public async Task<List<Icd10RecordModel>> GetRootDiagnoses()
+        {
+            var diagnoses = await _dbContext.Diagnoses
+                .Where(x => x.ParentId == null)
+                .OrderBy(x => x.MkbCode)
+                .Select(diagnosis => new Icd10RecordModel
+                {
+                    Id = diagnosis.Id,
+                    CreateTime = diagnosis.CreateDate,
+                    Name = diagnosis.MkbName,
+                    Code = diagnosis.MkbCode
+                }).ToListAsync();
+
+            return diagnoses;
         }
 
         private IQueryable<Speciality> Paginate(IQueryable<Speciality> specialities, int page, int size)
