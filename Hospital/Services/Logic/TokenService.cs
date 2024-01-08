@@ -28,13 +28,6 @@ namespace Hospital.Services.Logic
             _dbContext.SaveChanges();
         }
 
-        private bool IsTokenBanned(string token)
-        {
-            var tokenId = GetTokenId(token);
-            return _dbContext.BannedTokens
-                .FirstOrDefault(x => x.Id == tokenId) != null;
-        }
-
         public string GenerateToken(Doctor doctor)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -59,7 +52,15 @@ namespace Hospital.Services.Logic
             return tokenHandler.WriteToken(token);
         }
 
-        private Guid GetTokenId(string token)
+        public void ValidateToken(string token)
+        {
+            if (IsTokenBanned(token))
+            {
+                throw new UnauthorizedAccessException("Unauthorized: token is logged out");
+            }
+        }
+
+        public Guid GetDoctorId(string token)
         {
             if (token == null || token == "")
             {
@@ -70,15 +71,28 @@ namespace Hospital.Services.Logic
             var jsonToken = handler.ReadToken(token);
             var tokenS = jsonToken as JwtSecurityToken;
 
+            return Guid.Parse(tokenS.Claims.First(claim => claim.Type == "nameid").Value);
+        }
+
+        private Guid GetTokenId(string token)
+        {
+            if (token == null || token == "")
+            {
+                throw new UnauthorizedAccessException("Unauthorized: no token");
+            }
+
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token);
+            var tokenS = jsonToken as JwtSecurityToken;
+
             return Guid.Parse(tokenS.Claims.First(claim => claim.Type == ClaimTypes.Authentication).Value);
         }
 
-        public void ValidateToken(string token)
+        private bool IsTokenBanned(string token)
         {
-            if (IsTokenBanned(token))
-            {
-                throw new UnauthorizedAccessException();
-            }
+            var tokenId = GetTokenId(token);
+            return _dbContext.BannedTokens
+                .FirstOrDefault(x => x.Id == tokenId) != null;
         }
     }
 }

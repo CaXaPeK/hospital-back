@@ -119,6 +119,11 @@ namespace Hospital.Services.Logic
             return dto;
         }
 
+        public bool SpecialityExists(Guid speciality)
+        {
+            return _dbContext.Specialities.FirstOrDefault(x => x.Id == speciality) != null;
+        }
+
         private IQueryable<Speciality> PaginateSpecialities(IQueryable<Speciality> specialities, int page, int size)
         {
             return specialities.Skip((page - 1) * size).Take(size);

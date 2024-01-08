@@ -9,5 +9,7 @@ namespace Hospital.Services.Interfaces
         string GenerateToken(Doctor doctor);
 
         void ValidateToken(string token);
+
+        Guid GetDoctorId(string token);
     }
 }

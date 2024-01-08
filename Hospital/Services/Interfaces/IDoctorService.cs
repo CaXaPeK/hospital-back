@@ -10,5 +10,7 @@ namespace Hospital.Services.Interfaces
         Task<TokenResponseModel> Login(LoginCredentialsModel data);
 
         Task Logout(string token);
+
+        Task<DoctorModel> GetProfile(Guid doctorId);
     }
 }

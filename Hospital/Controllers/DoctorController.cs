@@ -81,9 +81,35 @@ namespace Hospital.Controllers
             {
                 var token = await HttpContext.GetTokenAsync("access_token");
                 _tokenService.ValidateToken(token);
+
                 await _doctorService.Logout(token);
 
                 return Ok(new ResponseModel { Status = null, Message = "Logged Out" });
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+        }
+
+        [HttpGet("profile")]
+        [Authorize]
+        public async Task<IActionResult> GetProfile()
+        {
+            try
+            {
+                var token = await HttpContext.GetTokenAsync("access_token");
+                _tokenService.ValidateToken(token);
+                var doctorId = _tokenService.GetDoctorId(token);
+
+                var profile = await _doctorService.GetProfile(doctorId);
+
+                return Ok(profile);
             }
             catch (UnauthorizedAccessException e)
             {

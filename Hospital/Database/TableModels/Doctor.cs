@@ -13,6 +13,9 @@ namespace Hospital.Database.TableModels
         public string Name { get; set; }
 
         [Required]
+        public DateTime CreateTime { get; set; }
+
+        [Required]
         [MinLength(6)]
         public string Password { get; set; }
 
