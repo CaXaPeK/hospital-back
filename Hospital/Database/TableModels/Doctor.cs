@@ -1,4 +1,5 @@
 ﻿using Hospital.Models.General;
+using Hospital.Validation;
 using System.ComponentModel.DataAnnotations;
 
 namespace Hospital.Database.TableModels
@@ -24,6 +25,7 @@ namespace Hospital.Database.TableModels
         ErrorMessage = "Invalid email address")]
         public string Email { get; set; }
 
+        [BirthDate]
         public DateTime? BirthDate { get; set; }
 
         [Required]
