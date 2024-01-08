@@ -42,5 +42,29 @@ namespace Hospital.Controllers
                     new ResponseModel { Status = "Error", Message = e.Message });
             }
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginCredentialsModel data)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var token = await _doctorService.Login(data);
+                return Ok(token);
+            }
+            catch (InvalidCredentialException e)
+            {
+                return BadRequest(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+        }
     }
 }

@@ -6,5 +6,7 @@ namespace Hospital.Services.Interfaces
     public interface IDoctorService
     {
         Task<TokenResponseModel> Register(DoctorRegisterModel data);
+
+        Task<TokenResponseModel> Login(LoginCredentialsModel data);
     }
 }
