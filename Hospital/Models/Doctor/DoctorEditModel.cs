@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Hospital.Models.General;
+using Hospital.Validation;
 
 namespace Hospital.Models.Doctor
 {
@@ -15,6 +16,7 @@ namespace Hospital.Models.Doctor
         [MaxLength(1000)]
         public string Name { get; set; }
 
+        [BirthDate]
         public DateTime? Birthday { get; set; }
 
         [Required]
