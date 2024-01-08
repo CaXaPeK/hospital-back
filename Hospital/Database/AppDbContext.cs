@@ -8,6 +8,8 @@ namespace Hospital.Database
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+        public DbSet<BannedToken> BannedTokens { get; set; }
+
         public DbSet<Diagnosis> Diagnoses { get; set; }
 
         public DbSet<Doctor> Doctors { get; set; }
