@@ -121,5 +121,30 @@ namespace Hospital.Controllers
                     new ResponseModel { Status = "Error", Message = e.Message });
             }
         }
+
+        [HttpPut("profile")]
+        [Authorize]
+        public async Task<IActionResult> EditProfile(DoctorEditModel data)
+        {
+            try
+            {
+                var token = await HttpContext.GetTokenAsync("access_token");
+                _tokenService.ValidateToken(token);
+                var doctorId = _tokenService.GetDoctorId(token);
+
+                await _doctorService.EditProfile(data, doctorId);
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+        }
     }
 }

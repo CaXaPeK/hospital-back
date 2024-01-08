@@ -27,14 +27,14 @@ namespace Hospital.Services.Logic
             _tokenService = tokenService;
         }
 
-        public async Task<TokenResponseModel> Register(DoctorRegisterModel data)
+        public async Task<TokenResponseModel> Register(DoctorRegisterModel newDoctor)
         {
-            if (!IsEmailUnique(data.Email))
+            if (!IsEmailUnique(newDoctor.Email))
             {
-                throw new InvalidCredentialException($"Email {data.Email} is already taken");
+                throw new InvalidCredentialException($"Email \"{newDoctor.Email}\" is already taken");
             }
 
-            if (!_dictionaryService.SpecialityExists(data.Speciality))
+            if (!_dictionaryService.SpecialityExists(newDoctor.Speciality))
             {
                 throw new InvalidCredentialException("Invalid speciality ID");
             }
@@ -42,14 +42,14 @@ namespace Hospital.Services.Logic
             var doctor = new Doctor
             {
                 Id = Guid.NewGuid(),
-                Name = data.Name,
+                Name = newDoctor.Name,
                 CreateTime = DateTime.UtcNow,
-                Password = EncodePassword(data.Password),
-                Email = data.Email,
-                BirthDate = data.Birthday,
-                Gender = data.Gender,
-                Phone = data.Phone,
-                Speciality = data.Speciality
+                Password = EncodePassword(newDoctor.Password),
+                Email = newDoctor.Email,
+                BirthDate = newDoctor.Birthday,
+                Gender = newDoctor.Gender,
+                Phone = newDoctor.Phone,
+                Speciality = newDoctor.Speciality
             };
 
             await _dbContext.Doctors.AddAsync(doctor);
@@ -59,9 +59,9 @@ namespace Hospital.Services.Logic
             return new TokenResponseModel{ Token = token };
         }
 
-        public async Task<TokenResponseModel> Login(LoginCredentialsModel data)
+        public async Task<TokenResponseModel> Login(LoginCredentialsModel credentials)
         {
-            var doctor = FindDoctor(data.Email, data.Password);
+            var doctor = FindDoctor(credentials.Email, credentials.Password);
 
             if (doctor == null)
             {
@@ -98,6 +98,29 @@ namespace Hospital.Services.Logic
             };
 
             return profile;
+        }
+
+        public async Task EditProfile(DoctorEditModel editedDoctor, Guid doctorId)
+        {
+            var doctor = FindDoctor(doctorId);
+
+            if (doctor == null)
+            {
+                throw new NotFoundException("Doctor not found");
+            }
+
+            if (!IsEmailUnique(editedDoctor.Email) && doctor.Email != editedDoctor.Email)
+            {
+                throw new InvalidCredentialException($"Email \"{editedDoctor.Email}\" is already taken");
+            }
+
+            doctor.Email = editedDoctor.Email;
+            doctor.Name = editedDoctor.Name;
+            doctor.BirthDate = editedDoctor.Birthday;
+            doctor.Gender = editedDoctor.Gender;
+            doctor.Phone = editedDoctor.Phone;
+
+            await _dbContext.SaveChangesAsync();
         }
 
         private Doctor? FindDoctor(Guid id)
