@@ -9,6 +9,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Hospital.Services.Logic;
+using Hospital.Exceptions;
 
 namespace Hospital.Controllers
 {
@@ -25,7 +26,15 @@ namespace Hospital.Controllers
             _tokenService = tokenService;
         }
 
+        /// <summary>
+        /// Register new user
+        /// </summary>
+        /// <response code="200">Doctor was registered</response>
+        /// <response code="400">Invalid arguments</response>
+        /// <response code="500">InternalServerError</response>
         [HttpPost("register")]
+        [ProducesResponseType(typeof(TokenResponseModel), 200)]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
         public async Task<IActionResult> Register([FromBody] DoctorRegisterModel data)
         {
             try
@@ -49,7 +58,15 @@ namespace Hospital.Controllers
             }
         }
 
+        /// <summary>
+        /// Log in to the system
+        /// </summary>
+        /// <response code="200">Logged in successfully</response>
+        /// <response code="400">Invalid arguments</response>
+        /// <response code="500">InternalServerError</response>
         [HttpPost("login")]
+        [ProducesResponseType(typeof(TokenResponseModel), 200)]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
         public async Task<IActionResult> Login([FromBody] LoginCredentialsModel data)
         {
             try
@@ -73,8 +90,16 @@ namespace Hospital.Controllers
             }
         }
 
+        /// <summary>
+        /// Log out system user
+        /// </summary>
+        /// <response code="200">Success</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="500">InternalServerError</response>
         [HttpPost("logout")]
         [Authorize]
+        [ProducesResponseType(typeof(ResponseModel), 200)]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
         public async Task<IActionResult> Logout()
         {
             try
@@ -97,7 +122,16 @@ namespace Hospital.Controllers
             }
         }
 
+        /// <summary>
+        /// Get user profile
+        /// </summary>
+        /// <response code="200">Success</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">InternalServerError</response>
         [HttpGet("profile")]
+        [ProducesResponseType(typeof(DoctorModel), 200)]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
         [Authorize]
         public async Task<IActionResult> GetProfile()
         {
@@ -115,6 +149,10 @@ namespace Hospital.Controllers
             {
                 return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
             }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ResponseModel { Status = "Error", Message = e.Message });
+            }
             catch (Exception e)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
@@ -122,12 +160,26 @@ namespace Hospital.Controllers
             }
         }
 
+        /// <summary>
+        /// Edit user Profile
+        /// </summary>
+        /// <response code="200">Success</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">InternalServerError</response>
         [HttpPut("profile")]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
         [Authorize]
         public async Task<IActionResult> EditProfile(DoctorEditModel data)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
                 var token = await HttpContext.GetTokenAsync("access_token");
                 _tokenService.ValidateToken(token);
                 var doctorId = _tokenService.GetDoctorId(token);
@@ -139,6 +191,10 @@ namespace Hospital.Controllers
             catch (UnauthorizedAccessException e)
             {
                 return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ResponseModel { Status = "Error", Message = e.Message });
             }
             catch (Exception e)
             {
