@@ -6,6 +6,7 @@ using Hospital.Services.Logic;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Hospital.Controllers
 {
@@ -53,6 +54,45 @@ namespace Hospital.Controllers
             catch (UnauthorizedAccessException e)
             {
                 return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get patient card
+        /// </summary>
+        /// /// <param name="id">Patient's identifier</param>
+        /// <response code="200">Success</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">InternalServerError</response>
+        [HttpGet("{id}")]
+        [Authorize]
+        [ProducesResponseType(typeof(PatientModel), 200)]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
+        public async Task<IActionResult> GetPatient(Guid id)
+        {
+            try
+            {
+                var token = await HttpContext.GetTokenAsync("access_token");
+                _tokenService.ValidateToken(token);
+
+                var patient = await _patientService.GetPatient(id);
+
+                return Ok(patient);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+
+            catch (NotFoundException e)
+            {
+                return NotFound(new ResponseModel { Status = "Error", Message = e.Message });
             }
             catch (Exception e)
             {

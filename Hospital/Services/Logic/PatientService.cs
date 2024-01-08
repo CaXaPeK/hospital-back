@@ -1,5 +1,6 @@
 ﻿using Hospital.Database;
 using Hospital.Database.TableModels;
+using Hospital.Exceptions;
 using Hospital.Models.Patient;
 using Hospital.Services.Interfaces;
 using System.ComponentModel.Design;
@@ -32,6 +33,33 @@ namespace Hospital.Services.Logic
             await _dbContext.SaveChangesAsync();
 
             return patient.Id;
+        }
+
+        public async Task<PatientModel> GetPatient(Guid id)
+        {
+            var patient = FindPatient(id);
+
+            if (patient == null)
+            {
+                throw new NotFoundException($"Patient with ID {id} not found in database");
+            }
+
+            var patientCard = new PatientModel
+            {
+                Id = patient.Id,
+                Name = patient.Name,
+                CreateTime = patient.CreateTime,
+                Birthday = patient.BirthDate,
+                Gender = patient.Gender
+            };
+
+            return patientCard;
+        }
+
+        private Patient? FindPatient(Guid id)
+        {
+            return _dbContext.Patients
+                .FirstOrDefault(x => x.Id == id);
         }
     }
 }
