@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Authentication;
 using System.Text;
 using System.Security.Cryptography;
+using Hospital.Controllers;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Hospital.Services.Logic
 {
@@ -51,6 +53,25 @@ namespace Hospital.Services.Logic
 
             var token = _tokenService.GenerateToken(doctor);
             return new TokenResponseModel{ Token = token };
+        }
+
+        public async Task<TokenResponseModel> Login(LoginCredentialsModel data)
+        {
+            var doctor = FindUser(data.Email, data.Password);
+
+            if (doctor == null)
+            {
+                throw new InvalidCredentialException("Login failed");
+            }
+
+            var token = _tokenService.GenerateToken(doctor);
+            return new TokenResponseModel { Token = token };
+        }
+
+        private Doctor? FindUser(string email, string password)
+        {
+            return _dbContext.Doctors
+                .FirstOrDefault(x => x.Email == email && x.Password == EncodePassword(password));
         }
 
         private bool IsEmailUnique(string email)
