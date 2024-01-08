@@ -10,6 +10,8 @@ namespace Hospital.Database
 
         public DbSet<Diagnosis> Diagnoses { get; set; }
 
+        public DbSet<Doctor> Doctors { get; set; }
+
         public DbSet<Speciality> Specialities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
