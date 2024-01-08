@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Hospital.Middlewares;
 
 namespace Hospital
 {
@@ -51,6 +52,7 @@ namespace Hospital
             });
 
             builder.Services.AddHostedService<DictionaryDataFiller>();
+            builder.Services.AddHostedService<BannedTokenAutodeleteMiddleware>();
 
             builder.Services.AddScoped<IDictionaryService, DictionaryService>();
             builder.Services.AddScoped<IDoctorService, DoctorService>();

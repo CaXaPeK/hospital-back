@@ -93,5 +93,17 @@
         <member name="M:Hospital.Migrations.Doctor.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:Hospital.Migrations.BannedToken">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.BannedToken.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.BannedToken.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.BannedToken.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
     </members>
 </doc>

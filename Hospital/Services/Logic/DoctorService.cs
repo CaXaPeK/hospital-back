@@ -68,6 +68,11 @@ namespace Hospital.Services.Logic
             return new TokenResponseModel { Token = token };
         }
 
+        public async Task Logout(string token)
+        {
+            _tokenService.BanToken(token);
+        }
+
         private Doctor? FindUser(string email, string password)
         {
             return _dbContext.Doctors

@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Hospital.Services.Interfaces;
 using System.Security.Authentication;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Hospital.Services.Logic;
 
 namespace Hospital.Controllers
 {
@@ -13,10 +17,12 @@ namespace Hospital.Controllers
     public class DoctorController : ControllerBase
     {
         private readonly IDoctorService _doctorService;
+        private readonly ITokenService _tokenService;
 
-        public DoctorController(IDoctorService doctorService)
+        public DoctorController(IDoctorService doctorService, ITokenService tokenService)
         {
             _doctorService = doctorService;
+            _tokenService = tokenService;
         }
 
         [HttpPost("register")]
@@ -59,6 +65,29 @@ namespace Hospital.Controllers
             catch (InvalidCredentialException e)
             {
                 return BadRequest(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+        }
+
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            try
+            {
+                var token = await HttpContext.GetTokenAsync("access_token");
+                _tokenService.ValidateToken(token);
+                await _doctorService.Logout(token);
+
+                return Ok(new ResponseModel { Status = null, Message = "Logged Out" });
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
             }
             catch (Exception e)
             {

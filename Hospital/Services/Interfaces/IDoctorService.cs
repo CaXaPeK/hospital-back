@@ -8,5 +8,7 @@ namespace Hospital.Services.Interfaces
         Task<TokenResponseModel> Register(DoctorRegisterModel data);
 
         Task<TokenResponseModel> Login(LoginCredentialsModel data);
+
+        Task Logout(string token);
     }
 }
