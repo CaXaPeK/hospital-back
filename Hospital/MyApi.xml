@@ -33,6 +33,49 @@
             <response code="200">Root ICD-10 elements retrieved</response>
             <response code="500">InternalServerError</response>
         </member>
+        <member name="M:Hospital.Controllers.DoctorController.Register(Hospital.Models.Doctor.DoctorRegisterModel)">
+            <summary>
+            Register new user
+            </summary>
+            <response code="200">Doctor was registered</response>
+            <response code="400">Invalid arguments</response>
+            <response code="500">InternalServerError</response>
+        </member>
+        <member name="M:Hospital.Controllers.DoctorController.Login(Hospital.Models.Doctor.LoginCredentialsModel)">
+            <summary>
+            Log in to the system
+            </summary>
+            <response code="200">Logged in successfully</response>
+            <response code="400">Invalid arguments</response>
+            <response code="500">InternalServerError</response>
+        </member>
+        <member name="M:Hospital.Controllers.DoctorController.Logout">
+            <summary>
+            Log out system user
+            </summary>
+            <response code="200">Success</response>
+            <response code="401">Unauthorized</response>
+            <response code="500">InternalServerError</response>
+        </member>
+        <member name="M:Hospital.Controllers.DoctorController.GetProfile">
+            <summary>
+            Get user profile
+            </summary>
+            <response code="200">Success</response>
+            <response code="401">Unauthorized</response>
+            <response code="404">Not Found</response>
+            <response code="500">InternalServerError</response>
+        </member>
+        <member name="M:Hospital.Controllers.DoctorController.EditProfile(Hospital.Models.Doctor.DoctorEditModel)">
+            <summary>
+            Edit user Profile
+            </summary>
+            <response code="200">Success</response>
+            <response code="400">Bad Request</response>
+            <response code="401">Unauthorized</response>
+            <response code="404">Not Found</response>
+            <response code="500">InternalServerError</response>
+        </member>
         <member name="T:Hospital.Migrations.Init">
             <inheritdoc />
         </member>
