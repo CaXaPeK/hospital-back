@@ -8,6 +8,8 @@ using Hospital.Services.Logic;
 using Hospital.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Hospital
 {
@@ -23,9 +25,36 @@ namespace Hospital
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(o =>
+            {
+                o.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = "Hospital",
+                    ValidateIssuer = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("abcdefghijklmnopqrstuvwxyz")),
+                    ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true,
+                    LifetimeValidator = (before, expires, token, parameters) =>
+                    {
+                        var utcNow = DateTime.UtcNow;
+                        return before <= utcNow && utcNow < expires;
+                    },
+                    ValidAudience = "audience",
+                    ValidateAudience = true
+                };
+            });
+
             builder.Services.AddHostedService<DictionaryDataFiller>();
 
             builder.Services.AddScoped<IDictionaryService, DictionaryService>();
+            builder.Services.AddScoped<IDoctorService, DoctorService>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
 
             builder.Services.AddAuthorization(options => options.DefaultPolicy =
                 new AuthorizationPolicyBuilder
@@ -78,6 +107,7 @@ namespace Hospital
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
             app.Run();

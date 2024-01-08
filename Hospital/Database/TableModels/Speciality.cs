@@ -14,13 +14,6 @@ namespace Hospital.Database.TableModels
         [Required]
         public DateTime CreateDate { get; set; }
 
-        public Speciality(Guid id, string name, DateTime createDate)
-        {
-            Id = id;
-            Name = name;
-            CreateDate = createDate;
-        }
-
         public Speciality(string name)
         {
             Id = Guid.NewGuid();
