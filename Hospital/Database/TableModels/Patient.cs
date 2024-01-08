@@ -2,22 +2,22 @@
 using Hospital.Validation;
 using System.ComponentModel.DataAnnotations;
 
-namespace Hospital.Models.Patient
+namespace Hospital.Database.TableModels
 {
-    public class PatientModel
+    public class Patient
     {
         [Required]
         public Guid Id { get; set; }
 
         [Required]
-        public DateTime CreateTime { get; set; }
-
-        [Required]
         [MinLength(1)]
         public string Name { get; set; }
 
+        [Required]
+        public DateTime CreateTime { get; set; }
+
         [BirthDate]
-        public DateTime? Birthday { get; set; }
+        public DateTime? BirthDate { get; set; }
 
         [Required]
         public Gender Gender { get; set; }

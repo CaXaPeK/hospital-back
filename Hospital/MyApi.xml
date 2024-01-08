@@ -76,6 +76,15 @@
             <response code="404">Not Found</response>
             <response code="500">InternalServerError</response>
         </member>
+        <member name="M:Hospital.Controllers.PatientController.CreatePatient(Hospital.Models.Patient.PatientCreateModel)">
+            <summary>
+            Create new patient
+            </summary>
+            <response code="200">Patient was registered</response>
+            <response code="400">Invalid arguments</response>
+            <response code="401">Unauthorized</response>
+            <response code="500">InternalServerError</response>
+        </member>
         <member name="T:Hospital.Migrations.Init">
             <inheritdoc />
         </member>
@@ -158,6 +167,18 @@
             <inheritdoc />
         </member>
         <member name="M:Hospital.Migrations.DoctorCreateTime.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Hospital.Migrations.Patient">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.Patient.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.Patient.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.Patient.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
     </members>
