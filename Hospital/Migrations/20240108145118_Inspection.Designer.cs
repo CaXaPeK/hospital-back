@@ -3,6 +3,7 @@ using System;
 using Hospital.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Hospital.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240108145118_Inspection")]
+    partial class Inspection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,7 +48,7 @@ namespace Hospital.Migrations
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ConsultationId")
+                    b.Property<Guid?>("ConsultationId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Content")
@@ -86,6 +89,8 @@ namespace Hospital.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("InspectionId");
+
+                    b.HasIndex("SpecialityId");
 
                     b.ToTable("Consultations");
                 });
@@ -182,12 +187,6 @@ namespace Hospital.Migrations
                         .IsRequired()
                         .HasMaxLength(5000)
                         .HasColumnType("character varying(5000)");
-
-                    b.Property<Guid>("AuthorId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("BaseInspectionId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("Complaints")
                         .IsRequired()
@@ -302,9 +301,7 @@ namespace Hospital.Migrations
                 {
                     b.HasOne("Hospital.Database.TableModels.Consultation", null)
                         .WithMany("Comments")
-                        .HasForeignKey("ConsultationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ConsultationId");
                 });
 
             modelBuilder.Entity("Hospital.Database.TableModels.Consultation", b =>
@@ -314,6 +311,14 @@ namespace Hospital.Migrations
                         .HasForeignKey("InspectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Hospital.Database.TableModels.Speciality", "Speciality")
+                        .WithMany()
+                        .HasForeignKey("SpecialityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Speciality");
                 });
 
             modelBuilder.Entity("Hospital.Database.TableModels.Inspection", b =>

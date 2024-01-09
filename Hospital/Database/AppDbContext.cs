@@ -10,9 +10,17 @@ namespace Hospital.Database
 
         public DbSet<BannedToken> BannedTokens { get; set; }
 
+        public DbSet<Comment> Comments { get; set; }
+
+        public DbSet<Consultation> Consultations { get; set; }
+
         public DbSet<Diagnosis> Diagnoses { get; set; }
 
         public DbSet<Doctor> Doctors { get; set; }
+
+        public DbSet<Inspection> Inspections { get; set; }
+
+        public DbSet<InspectionDiagnosis> InspectionDiagnoses { get; set; }
 
         public DbSet<Patient> Patients { get; set; }
 

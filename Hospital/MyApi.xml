@@ -85,6 +85,18 @@
             <response code="401">Unauthorized</response>
             <response code="500">InternalServerError</response>
         </member>
+        <member name="M:Hospital.Controllers.PatientController.CreateInspection(Hospital.Models.Inspection.InspectionCreateModel,System.Guid)">
+            <summary>
+            Create inspection for specified patient
+            </summary>
+            /// <param name="id">Patient's identifier</param>
+            <response code="200">Success</response>
+            <response code="400">Bad Request</response>
+            <response code="401">Unauthorized</response>
+            <response code="403">Can't create new inspection</response>
+            <response code="404">Not Found</response>
+            <response code="500">InternalServerError</response>
+        </member>
         <member name="M:Hospital.Controllers.PatientController.GetPatient(System.Guid)">
             <summary>
             Get patient card
@@ -189,6 +201,30 @@
             <inheritdoc />
         </member>
         <member name="M:Hospital.Migrations.Patient.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Hospital.Migrations.Inspection">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.Inspection.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.Inspection.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.Inspection.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Hospital.Migrations.MinorChanges">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.MinorChanges.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.MinorChanges.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.MinorChanges.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
     </members>
