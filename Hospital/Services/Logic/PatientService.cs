@@ -2,10 +2,13 @@
 using Hospital.Database.TableModels;
 using Hospital.Exceptions;
 using Hospital.Models.Diagnosis;
+using Hospital.Models.General;
+using Hospital.Models.Icd;
 using Hospital.Models.Inspection;
 using Hospital.Models.Patient;
 using Hospital.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System.Security.Authentication;
 
 namespace Hospital.Services.Logic
@@ -39,6 +42,56 @@ namespace Hospital.Services.Logic
             await _dbContext.SaveChangesAsync();
 
             return patient.Id;
+        }
+
+        public async Task<PatientPagedListModel> GetPatientList(
+            string? name,
+            List<Conclusion>? conclusions,
+            PatientSorting? sorting,
+            bool scheduledVisits,
+            bool onlyMine,
+            int page,
+            int size,
+            Guid doctorId
+            )
+        {
+            var patient = _dbContext.Patients
+                .AsQueryable();
+
+            var filteredPatients = ApplyFilters(patient, name, conclusions, sorting, scheduledVisits, onlyMine, doctorId);
+
+            var pagedPatients = PaginatePatients(filteredPatients, page, size);
+
+            var pageCount = (int)Math.Ceiling((double)filteredPatients.Count() / size);
+
+            pageCount = pageCount == 0 ? 1 : pageCount;
+
+            if (page > pageCount)
+            {
+                throw new InvalidOperationException("Invalid page");
+            }
+
+            var list = new PatientPagedListModel
+            {
+                Patients = await pagedPatients
+                    .Select(patient => new PatientModel
+                    {
+                        Id = patient.Id,
+                        CreateTime = patient.CreateTime,
+                        Name = patient.Name,
+                        Birthday = patient.BirthDate,
+                        Gender = patient.Gender
+                    })
+                    .ToListAsync(),
+                Pagination = new PageInfoModel
+                {
+                    Size = size,
+                    Count = pageCount,
+                    Current = page
+                }
+            };
+
+            return list;
         }
 
         public async Task<Guid> CreateInspection(InspectionCreateModel newInspection, Guid patientId, Guid authorId)
@@ -156,13 +209,74 @@ namespace Hospital.Services.Logic
                 Birthday = patient.BirthDate,
                 Gender = patient.Gender
             };
-
             return patientCard;
         }
 
+        private IQueryable<Patient> ApplyFilters(
+            IQueryable<Patient> patients,
+            string? name,
+            List<Conclusion>? conclusions,
+            PatientSorting? sorting,
+            bool scheduledVisits,
+            bool onlyMine,
+            Guid doctorId
+            )
+        {
+            if (name != "" && name != null)
+            {
+                patients = patients.Where(x => x.Name.ToLower().Contains(name.ToLower()));
+            }
+
+            if (conclusions.Count != 0)
+            {
+                patients = patients
+                    .Where(p => p.Inspections.Any(i => conclusions.Contains(i.Conclusion)));
+            }
+
+            if (scheduledVisits)
+            {
+                patients = patients
+                    .Where(p => p.Inspections
+                        .Any(i => i.NextVisitDate != null && !p.Inspections.Any(ii => ii.PreviousInspectionId == i.Id)));
+            }
+
+            if (onlyMine)
+            {
+                patients = patients
+                    .Where(p => p.Inspections.Any(i => i.AuthorId == doctorId));
+            }
+
+            switch (sorting)
+            {
+                case PatientSorting.NameAsc:
+                    patients = patients.OrderBy(p => p.Name);
+                    break;
+                case PatientSorting.NameDesc:
+                    patients = patients.OrderByDescending(p => p.Name);
+                    break;
+                case PatientSorting.CreateAsc:
+                    patients = patients.OrderBy(p => p.CreateTime);
+                    break;
+                case PatientSorting.CreateDesc:
+                    patients = patients.OrderByDescending(p => p.CreateTime);
+                    break;
+                case PatientSorting.InspectionAsc:
+                    patients = patients.OrderBy(p => p.Inspections.Min(i => i.Date));
+                    break;
+                case PatientSorting.InspectionDesc:
+                    patients = patients.OrderByDescending(p => p.Inspections.Max(i => i.Date));
+                    break;
+                default:
+                    patients = patients.OrderBy(p => p.Name);
+                    break;
+            }
+
+            return patients;
+        } 
+
         private void ValidateInspection(InspectionCreateModel newInspection, Patient patient)
         { 
-            if (HasDeathInspection(patient))
+            if (HasDeathInspection(patient.Id))
             {
                 throw new MethodAccessException($"Patient with ID {patient.Id} already has an inspection with a Death conclusion. Can't create new inspections");
             }
@@ -176,7 +290,7 @@ namespace Hospital.Services.Logic
                     throw new NotFoundException($"Previous inspection with ID {newInspection.PreviousInspectionId.Value} not found in the database");
                 }
 
-                if (PreviousInspectionAlreadyHasChild(newInspection.PreviousInspectionId.Value, patient))
+                if (InspectionHasChild(newInspection.PreviousInspectionId.Value, patient.Id))
                 {
                     throw new InvalidCredentialException($"Child inspection already exists for inspection {previousInspection.Id}");
                 }
@@ -256,16 +370,16 @@ namespace Hospital.Services.Logic
             }
         }
 
-        private bool PreviousInspectionAlreadyHasChild(Guid previousInspectionId, Patient patient)
+        private bool InspectionHasChild(Guid inspectionId, Guid patientId)
         {
-            return patient.Inspections
-                .Any(x => x.PreviousInspectionId == previousInspectionId);
+            return _dbContext.Inspections
+                .Any(i => i.PreviousInspectionId == inspectionId && i.PatientId == patientId);
         }
 
-        private bool HasDeathInspection(Patient patient)
+        private bool HasDeathInspection(Guid patientId)
         {
-            return patient.Inspections
-                .Any(x => x.Conclusion == Conclusion.Death);
+            return _dbContext.Inspections
+                .Any(i => i.Conclusion == Conclusion.Death && i.PatientId == patientId);
         }
 
         private int MainDiagnosesCount(List<DiagnosisCreateModel> diagnoses)
@@ -286,14 +400,19 @@ namespace Hospital.Services.Logic
         private Inspection? FindInspection(Guid id)
         {
             return _dbContext.Inspections
-                .FirstOrDefault(x => x.Id == id);
+                .FirstOrDefault(i => i.Id == id);
         }
 
         private Patient? FindPatient(Guid id)
         {
             return _dbContext.Patients
-                .Include(x => x.Inspections)
-                .FirstOrDefault(x => x.Id == id);
+                .Include(p => p.Inspections)
+                .FirstOrDefault(p => p.Id == id);
+        }
+
+        private IQueryable<Patient> PaginatePatients(IQueryable<Patient> patients, int page, int size)
+        {
+            return patients.Skip((page - 1) * size).Take(size);
         }
     }
 }

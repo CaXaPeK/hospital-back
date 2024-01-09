@@ -71,7 +71,7 @@ namespace Hospital.Controllers
         [HttpGet("icd10")]
         [ProducesResponseType(typeof(Icd10SearchModel), 200)]
         [ProducesResponseType(typeof(ResponseModel), 500)]
-        public async Task<IActionResult> GetDiagnoses(
+        public async Task<IActionResult> GetDiagnosesList(
             [MaxLength(255)] string? request,
             [Range(1, Int32.MaxValue)] int page = 1,
             [Range(1, Int32.MaxValue)] int size = 5
@@ -84,7 +84,7 @@ namespace Hospital.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var list = await _dictionaryService.GetDiagnoses(request, page, size);
+                var list = await _dictionaryService.GetDiagnosesList(request, page, size);
                 return Ok(list);
             }
             catch (InvalidOperationException e)

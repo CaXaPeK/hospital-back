@@ -15,7 +15,7 @@
             <response code="400">Invalid arguments for filtration/pagination</response>
             <response code="500">InternalServerError</response>
         </member>
-        <member name="M:Hospital.Controllers.DictionaryController.GetDiagnoses(System.String,System.Int32,System.Int32)">
+        <member name="M:Hospital.Controllers.DictionaryController.GetDiagnosesList(System.String,System.Int32,System.Int32)">
             <summary>
             Search for diagnoses in ICD-10 dictionary
             </summary>
@@ -85,11 +85,28 @@
             <response code="401">Unauthorized</response>
             <response code="500">InternalServerError</response>
         </member>
+        <member name="M:Hospital.Controllers.PatientController.GetPatientList(System.String,System.Collections.Generic.List{Hospital.Models.Inspection.Conclusion},System.Nullable{Hospital.Models.Patient.PatientSorting},System.Boolean,System.Boolean,System.Int32,System.Int32)">
+            <summary>
+            Get patients list
+            </summary>
+            <param name="name">part of the name for filtering</param>
+            <param name="conclusions">conclusion list to filter by conclusions</param>
+            <param name="sorting">option to sort patients</param>
+            <param name="scheduledVisits">show only scheduled visits</param>
+            <param name="onlyMine">show inspections done by this doctor</param>
+            <param name="page">page number</param>
+            <param name="size">required number of elements per page</param>
+            <response code="200">Patients paged list retrieved</response>
+            <response code="400">Invalid arguments for filtration/pagination/sorting</response>
+            <response code="401">Unauthorized</response>
+            <response code="404">Not Found</response>
+            <response code="500">InternalServerError</response>
+        </member>
         <member name="M:Hospital.Controllers.PatientController.CreateInspection(Hospital.Models.Inspection.InspectionCreateModel,System.Guid)">
             <summary>
             Create inspection for specified patient
             </summary>
-            /// <param name="id">Patient's identifier</param>
+            <param name="id">Patient's identifier</param>
             <response code="200">Success</response>
             <response code="400">Bad Request</response>
             <response code="401">Unauthorized</response>
@@ -101,7 +118,7 @@
             <summary>
             Get patient card
             </summary>
-            /// <param name="id">Patient's identifier</param>
+            <param name="id">Patient's identifier</param>
             <response code="200">Success</response>
             <response code="401">Unauthorized</response>
             <response code="404">Not Found</response>
@@ -225,6 +242,18 @@
             <inheritdoc />
         </member>
         <member name="M:Hospital.Migrations.MinorChanges.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Hospital.Migrations.MinorChanges2">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.MinorChanges2.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.MinorChanges2.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.MinorChanges2.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
     </members>

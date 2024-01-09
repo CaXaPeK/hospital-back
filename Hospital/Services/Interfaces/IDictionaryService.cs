@@ -9,7 +9,7 @@ namespace Hospital.Services.Interfaces
 
         Task<List<Icd10RecordModel>> GetRootDiagnoses();
 
-        Task<Icd10SearchModel> GetDiagnoses(string? request, int page, int size);
+        Task<Icd10SearchModel> GetDiagnosesList(string? request, int page, int size);
 
         bool SpecialityExists(Guid id);
 
