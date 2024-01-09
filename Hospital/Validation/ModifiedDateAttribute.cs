@@ -3,7 +3,7 @@
 namespace Hospital.Validation
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-    public class BirthDateAttribute : ValidationAttribute
+    public class ModifiedDateAttribute : ValidationAttribute
     {
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
@@ -11,7 +11,7 @@ namespace Hospital.Validation
             {
                 if (date > DateTime.UtcNow)
                 {
-                    return new ValidationResult(ErrorMessage = "Birth date can't be later than today");
+                    return new ValidationResult(ErrorMessage = "Modification time can't be later than now");
                 }
             }
 

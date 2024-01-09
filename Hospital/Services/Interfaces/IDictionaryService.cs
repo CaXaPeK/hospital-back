@@ -11,6 +11,8 @@ namespace Hospital.Services.Interfaces
 
         Task<Icd10SearchModel> GetDiagnoses(string? request, int page, int size);
 
-        bool SpecialityExists(Guid speciality);
+        bool SpecialityExists(Guid id);
+
+        bool DiagnosisExists(Guid id);
     }
 }

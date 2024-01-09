@@ -1,46 +1,54 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
-using Hospital.Models.Consultation;
-using Hospital.Models.Diagnosis;
+﻿using Hospital.Models.Inspection;
 using Hospital.Validation;
+using System.ComponentModel.DataAnnotations;
 
-namespace Hospital.Models.Inspection
+namespace Hospital.Database.TableModels
 {
-    public class InspectionCreateModel
+    public class Inspection
     {
+        [Required]
+        public Guid Id { get; set; }
+
+        [Required]
+        public DateTime CreateTime { get; set; }
+
         [Required]
         [InspectionDate]
         public DateTime Date { get; set; }
 
         [Required]
-        [MinLength(1)]
         [MaxLength(5000)]
         public string Anamnesis { get; set; }
 
         [Required]
-        [MinLength(1)]
         [MaxLength(5000)]
         public string Complaints { get; set; }
 
         [Required]
-        [MinLength(1)]
         [MaxLength(5000)]
         public string Treatment { get; set; }
 
         [Required]
         public Conclusion Conclusion { get; set; }
 
-        [NextVisitDate]
         public DateTime? NextVisitDate { get; set; }
 
         public DateTime? DeathDate { get; set; }
 
+        [Required]
+        public Guid BaseInspectionId { get; set; }
+
         public Guid? PreviousInspectionId { get; set; }
 
         [Required]
-        [MinLength(1)]
-        public List<DiagnosisCreateModel> Diagnoses { get; set; }
+        public List<InspectionDiagnosis> Diagnoses { get; set; }
 
-        public List<ConsultationCreateModel>? Consultations { get; set; }
+        public List<Consultation> Consultations { get; set; }
+
+        [Required]
+        public Guid PatientId { get; set; }
+
+        [Required]
+        public Guid AuthorId { get; set; }
     }
 }

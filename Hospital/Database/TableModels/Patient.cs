@@ -21,5 +21,7 @@ namespace Hospital.Database.TableModels
 
         [Required]
         public Gender Gender { get; set; }
+
+        public List<Inspection> Inspections { get; set; }
     }
 }
