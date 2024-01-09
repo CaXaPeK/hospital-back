@@ -23,17 +23,19 @@ namespace Hospital.Services.Logic
         public async Task<SpecialtiesPagedListModel> GetSpecialitiesList(string? name, int page, int size)
         {
             var specialities = _dbContext.Specialities
-                .OrderBy(x => x.Name)
+                .OrderBy(s => s.Name)
                 .AsQueryable();
 
             if (name != "" && name != null)
             {
-                specialities = specialities.Where(p => p.Name.ToLower().Contains(name.ToLower()));
+                specialities = specialities.Where(s => s.Name.ToLower().Contains(name.ToLower()));
             }
 
             var pagedSpecialities = PaginateSpecialities(specialities, page, size);
 
             var pageCount = (int)Math.Ceiling((double)specialities.Count() / size);
+
+            pageCount = pageCount == 0 ? 1 : pageCount;
 
             if (page > pageCount)
             {
@@ -64,8 +66,8 @@ namespace Hospital.Services.Logic
         public async Task<List<Icd10RecordModel>> GetRootDiagnoses()
         {
             var diagnoses = await _dbContext.Diagnoses
-                .Where(x => x.ParentId == null)
-                .OrderBy(x => x.MkbCode)
+                .Where(d => d.ParentId == null)
+                .OrderBy(d => d.MkbCode)
                 .Select(diagnosis => new Icd10RecordModel
                 {
                     Id = diagnosis.Id,
@@ -77,7 +79,7 @@ namespace Hospital.Services.Logic
             return diagnoses;
         }
 
-        public async Task<Icd10SearchModel> GetDiagnoses(string? request, int page, int size)
+        public async Task<Icd10SearchModel> GetDiagnosesList(string? request, int page, int size)
         {
             var diagnoses = _dbContext.Diagnoses
                 .OrderBy(x => x.MkbCode)
@@ -85,12 +87,14 @@ namespace Hospital.Services.Logic
 
             if (request != "" && request != null)
             {
-                diagnoses = diagnoses.Where(p => p.MkbName.ToLower().Contains(request.ToLower()) || p.MkbCode.ToLower().Contains(request.ToLower()));
+                diagnoses = diagnoses.Where(d => d.MkbName.ToLower().Contains(request.ToLower()) || d.MkbCode.ToLower().Contains(request.ToLower()));
             }
 
             var pagedDiagnoses = PaginateDiagnoses(diagnoses, page, size);
 
             var pageCount = (int)Math.Ceiling((double)diagnoses.Count() / size);
+
+            pageCount = pageCount == 0 ? 1 : pageCount;
 
             if (page > pageCount)
             {
@@ -121,12 +125,12 @@ namespace Hospital.Services.Logic
 
         public bool SpecialityExists(Guid id)
         {
-            return _dbContext.Specialities.FirstOrDefault(x => x.Id == id) != null;
+            return _dbContext.Specialities.FirstOrDefault(s => s.Id == id) != null;
         }
 
         public bool DiagnosisExists(Guid id)
         {
-            return _dbContext.Diagnoses.FirstOrDefault(x => x.Id == id) != null;
+            return _dbContext.Diagnoses.FirstOrDefault(d => d.Id == id) != null;
         }
 
         private IQueryable<Speciality> PaginateSpecialities(IQueryable<Speciality> specialities, int page, int size)

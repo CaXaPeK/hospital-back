@@ -33,7 +33,7 @@ namespace Hospital.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BannedTokens");
+                    b.ToTable("BannedTokens", (string)null);
                 });
 
             modelBuilder.Entity("Hospital.Database.TableModels.Comment", b =>
@@ -65,7 +65,7 @@ namespace Hospital.Migrations
 
                     b.HasIndex("ConsultationId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("Hospital.Database.TableModels.Consultation", b =>
@@ -87,7 +87,7 @@ namespace Hospital.Migrations
 
                     b.HasIndex("InspectionId");
 
-                    b.ToTable("Consultations");
+                    b.ToTable("Consultations", (string)null);
                 });
 
             modelBuilder.Entity("Hospital.Database.TableModels.Diagnosis", b =>
@@ -131,7 +131,7 @@ namespace Hospital.Migrations
 
                     b.HasIndex("Id");
 
-                    b.ToTable("Diagnoses");
+                    b.ToTable("Diagnoses", (string)null);
                 });
 
             modelBuilder.Entity("Hospital.Database.TableModels.Doctor", b =>
@@ -169,7 +169,7 @@ namespace Hospital.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Doctors");
+                    b.ToTable("Doctors", (string)null);
                 });
 
             modelBuilder.Entity("Hospital.Database.TableModels.Inspection", b =>
@@ -224,7 +224,7 @@ namespace Hospital.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("Inspections");
+                    b.ToTable("Inspections", (string)null);
                 });
 
             modelBuilder.Entity("Hospital.Database.TableModels.InspectionDiagnosis", b =>
@@ -253,7 +253,7 @@ namespace Hospital.Migrations
 
                     b.HasIndex("InspectionId");
 
-                    b.ToTable("InspectionDiagnoses");
+                    b.ToTable("InspectionDiagnoses", (string)null);
                 });
 
             modelBuilder.Entity("Hospital.Database.TableModels.Patient", b =>
@@ -277,7 +277,7 @@ namespace Hospital.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Patients");
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("Hospital.Database.TableModels.Speciality", b =>
@@ -295,7 +295,7 @@ namespace Hospital.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Specialities");
+                    b.ToTable("Specialities", (string)null);
                 });
 
             modelBuilder.Entity("Hospital.Database.TableModels.Comment", b =>
