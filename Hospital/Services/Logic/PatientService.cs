@@ -58,7 +58,7 @@ namespace Hospital.Services.Logic
             var patient = _dbContext.Patients
                 .AsQueryable();
 
-            var filteredPatients = ApplyFilters(patient, name, conclusions, sorting, scheduledVisits, onlyMine, doctorId);
+            var filteredPatients = ApplyPatientFilters(patient, name, conclusions, sorting, scheduledVisits, onlyMine, doctorId);
 
             var pagedPatients = PaginatePatients(filteredPatients, page, size);
 
@@ -192,6 +192,70 @@ namespace Hospital.Services.Logic
             return inspection.Id;
         }
 
+        public async Task<InspectionPagedListModel> GetInspectionList(Guid patientId, List<Guid> icdRoots, bool grouped, int page, int size)
+        {
+            var patient = FindPatient(patientId);
+
+            if (patient == null)
+            {
+                throw new NotFoundException($"Patient with ID {patientId} not found in the database");
+            }
+
+            //throw new NotFoundException((patient.Inspections == null).ToString());
+
+            var inspections = _dbContext.Inspections
+                .Where(i => i.PatientId == patientId)
+                .AsQueryable();
+
+            //throw new NotFoundException((inspections.Include(i => i.Diagnoses).First().Diagnoses == null).ToString());
+
+            var filteredInspections = ApplyInspectionFilters(inspections, icdRoots, grouped);
+
+            var pagedInspections = PaginateInspections(filteredInspections, page, size);
+
+            var pageCount = (int)Math.Ceiling((double)filteredInspections.Count() / size);
+
+            pageCount = pageCount == 0 ? 1 : pageCount;
+
+            if (page > pageCount)
+            {
+                throw new InvalidOperationException("Invalid page");
+            }
+
+            var list = new InspectionPagedListModel
+            {
+                Inspections = pagedInspections
+                    .Select(inspection => new InspectionPreviewModel
+                    {
+                        Id = inspection.Id,
+                        CreateTime = inspection.CreateTime,
+                        PreviousId = inspection.PreviousInspectionId,
+                        Date = inspection.Date,
+                        Conclusion = inspection.Conclusion,
+                        DoctorId = inspection.AuthorId,
+                        Doctor = _dbContext.Doctors.First(d => d.Id == inspection.AuthorId).Name,
+                        PatientId = inspection.PatientId,
+                        Patient = _dbContext.Patients.First(p => p.Id == inspection.PatientId).Name,
+                        Diagnosis = CreateDiagnosisModel
+                        (
+                            inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main),
+                            _dbContext.Diagnoses.First(icdD => icdD.Id == inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main).IcdDiagnosisId)
+                        ),
+                        HasChain = inspection.BaseInspectionId == inspection.Id,
+                        HasNested = _dbContext.Inspections.Any(i => i.PreviousInspectionId == inspection.Id)
+                    })
+                    .ToList(),
+                Pagination = new PageInfoModel
+                {
+                    Size = size,
+                    Count = pageCount,
+                    Current = page
+                }
+            };
+
+            return list;
+        }
+
         public async Task<PatientModel> GetPatient(Guid id)
         {
             var patient = FindPatient(id);
@@ -212,7 +276,20 @@ namespace Hospital.Services.Logic
             return patientCard;
         }
 
-        private IQueryable<Patient> ApplyFilters(
+        private static DiagnosisModel CreateDiagnosisModel(InspectionDiagnosis diagnosis, Diagnosis icdDiagnosis)
+        {
+            return new DiagnosisModel
+            {
+                Id = diagnosis.Id,
+                CreateTime = diagnosis.CreateTime,
+                Code = icdDiagnosis.MkbCode,
+                Name = icdDiagnosis.MkbName,
+                Description = diagnosis.Description,
+                Type = DiagnosisType.Main
+            };
+        }
+
+        private IQueryable<Patient> ApplyPatientFilters(
             IQueryable<Patient> patients,
             string? name,
             List<Conclusion>? conclusions,
@@ -272,7 +349,43 @@ namespace Hospital.Services.Logic
             }
 
             return patients;
-        } 
+        }
+        private IQueryable<Inspection> ApplyInspectionFilters(IQueryable<Inspection> inspections, List<Guid> icdRoots, bool grouped)
+        {
+            if (icdRoots.Count != 0)
+            {
+                var icdRootCodes = new List<string>();
+
+                foreach (var diagnosisId in icdRoots)
+                {
+                    var diagnosis = _dbContext.Diagnoses.FirstOrDefault(d => d.Id == diagnosisId);
+
+                    if (diagnosis == null)
+                    {
+                        throw new NotFoundException($"Diagnosis with ID {diagnosisId} not found in the database");
+                    }
+
+                    if (diagnosis.ParentId != null)
+                    {
+                        throw new InvalidOperationException($"Diagnosis with ID {diagnosisId} is not a root diagnosis");
+                    }
+
+                    icdRootCodes.Add(diagnosis.MkbCode);
+                }
+
+                inspections = inspections
+                    .Where(i => i.Diagnoses.Any(d => d.Type == DiagnosisType.Main
+                            && icdRootCodes.Contains(_dbContext.Diagnoses.FirstOrDefault(icdD => icdD.Id == d.IcdDiagnosisId).MkbCode)));
+            }
+
+            if (grouped)
+            {
+                inspections = inspections
+                    .Where(i => i.PreviousInspectionId == null);
+            }
+
+            return inspections;
+        }
 
         private void ValidateInspection(InspectionCreateModel newInspection, Patient patient)
         { 
@@ -290,7 +403,9 @@ namespace Hospital.Services.Logic
                     throw new NotFoundException($"Previous inspection with ID {newInspection.PreviousInspectionId.Value} not found in the database");
                 }
 
-                if (InspectionHasChild(newInspection.PreviousInspectionId.Value, patient.Id))
+                var prevInspectionId = newInspection.PreviousInspectionId.Value;
+
+                if (_dbContext.Inspections.Any(i => i.PreviousInspectionId == prevInspectionId))
                 {
                     throw new InvalidCredentialException($"Child inspection already exists for inspection {previousInspection.Id}");
                 }
@@ -370,12 +485,6 @@ namespace Hospital.Services.Logic
             }
         }
 
-        private bool InspectionHasChild(Guid inspectionId, Guid patientId)
-        {
-            return _dbContext.Inspections
-                .Any(i => i.PreviousInspectionId == inspectionId && i.PatientId == patientId);
-        }
-
         private bool HasDeathInspection(Guid patientId)
         {
             return _dbContext.Inspections
@@ -413,6 +522,11 @@ namespace Hospital.Services.Logic
         private IQueryable<Patient> PaginatePatients(IQueryable<Patient> patients, int page, int size)
         {
             return patients.Skip((page - 1) * size).Take(size);
+        }
+
+        private IQueryable<Inspection> PaginateInspections(IQueryable<Inspection> inspections, int page, int size)
+        {
+            return inspections.Skip((page - 1) * size).Take(size);
         }
     }
 }

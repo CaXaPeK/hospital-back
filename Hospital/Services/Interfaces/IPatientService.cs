@@ -20,6 +20,8 @@ namespace Hospital.Services.Interfaces
 
         Task<Guid> CreateInspection(InspectionCreateModel newInspection, Guid patientId, Guid authorId);
 
+        Task<InspectionPagedListModel> GetInspectionList(Guid patientId, List<Guid> icdRoots, bool grouped, int page, int size);
+
         Task<PatientModel> GetPatient(Guid id);
     }
 }
