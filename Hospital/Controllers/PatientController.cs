@@ -275,5 +275,46 @@ namespace Hospital.Controllers
                     new ResponseModel { Status = "Error", Message = e.Message });
             }
         }
+
+        /// <summary>
+        /// Search for patient medical inspections without child inspections
+        /// </summary>
+        /// <param name="id">Patient's identifier</param>
+        /// <param name="request">part of the diagnosis name or code</param>
+        /// <response code="200">Patients inspections list retrieved</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">InternalServerError</response>
+        [HttpGet("{id}/inspections/search")]
+        [Authorize]
+
+        [ProducesResponseType(typeof(InspectionShortModel), 200)]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
+        public async Task<IActionResult> GetInspectionsWithoutChildren(Guid id, [FromQuery] string? request
+            )
+        {
+            try
+            {
+                var token = await HttpContext.GetTokenAsync("access_token");
+                _tokenService.ValidateToken(token);
+
+                var list = await _patientService.GetInspectionsWithoutChildren(id, request);
+
+                return Ok(list);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+        }
     }
 }
