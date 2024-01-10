@@ -7,8 +7,10 @@ using Hospital.Models.Icd;
 using Hospital.Models.Inspection;
 using Hospital.Models.Patient;
 using Hospital.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using System.Drawing;
 using System.Security.Authentication;
 
 namespace Hospital.Services.Logic
@@ -201,13 +203,9 @@ namespace Hospital.Services.Logic
                 throw new NotFoundException($"Patient with ID {patientId} not found in the database");
             }
 
-            //throw new NotFoundException((patient.Inspections == null).ToString());
-
             var inspections = _dbContext.Inspections
                 .Where(i => i.PatientId == patientId)
                 .AsQueryable();
-
-            //throw new NotFoundException((inspections.Include(i => i.Diagnoses).First().Diagnoses == null).ToString());
 
             var filteredInspections = ApplyInspectionFilters(inspections, icdRoots, grouped);
 
@@ -274,6 +272,57 @@ namespace Hospital.Services.Logic
                 Gender = patient.Gender
             };
             return patientCard;
+        }
+
+        public async Task<List<InspectionShortModel>> GetInspectionsWithoutChildren(Guid patientId, string? request)
+        {
+            var patient = FindPatient(patientId);
+
+            if (patient == null)
+            {
+                throw new NotFoundException($"Patient with ID {patientId} not found in the database");
+            }
+
+            var inspections = _dbContext.Inspections
+                .Where(i => i.PatientId == patientId)
+                .AsQueryable();
+
+            inspections = inspections
+                .Where(i => !_dbContext.Inspections.Any(i => i.PreviousInspectionId == i.Id));
+
+            if (request != "" && request != null)
+            {
+                inspections = SearchMatchingDiagnosisNameOrCode(inspections, request);
+            }
+
+            var list = inspections
+                .Select(inspection => new InspectionShortModel
+                {
+                    Id = inspection.Id,
+                    CreateTime = inspection.CreateTime,
+                    Date = inspection.Date,
+                    Diagnosis = CreateDiagnosisModel
+                    (
+                        inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main),
+                        _dbContext.Diagnoses.First(icdD => icdD.Id == inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main).IcdDiagnosisId)
+                    )
+                })
+                .ToList();
+
+            return list;
+        }
+
+        private bool InspectionHasChild(Guid inspectionId)
+        {
+            return _dbContext.Inspections.Any(i => i.PreviousInspectionId == inspectionId);
+        }
+
+        private IQueryable<Inspection> SearchMatchingDiagnosisNameOrCode(IQueryable<Inspection> inspections, string request)
+        {
+            return inspections
+                .Where(i => _dbContext.Diagnoses
+                    .Any(icdD => icdD.Id == i.Diagnoses.First(d => d.Type == DiagnosisType.Main).IcdDiagnosisId
+                        && (icdD.MkbName.ToLower().Contains(request.ToLower()) || icdD.MkbCode.ToLower().Contains(request.ToLower()))));
         }
 
         private static DiagnosisModel CreateDiagnosisModel(InspectionDiagnosis diagnosis, Diagnosis icdDiagnosis)

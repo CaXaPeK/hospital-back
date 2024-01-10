@@ -140,6 +140,17 @@
             <response code="404">Not Found</response>
             <response code="500">InternalServerError</response>
         </member>
+        <member name="M:Hospital.Controllers.PatientController.SearchInspections(System.Guid,System.String)">
+            <summary>
+            Search for patient medical inspections without child inspections
+            </summary>
+            <param name="id">Patient's identifier</param>
+            <param name="request">part of the diagnosis name or code</param>
+            <response code="200">Patients inspections list retrieved</response>
+            <response code="401">Unauthorized</response>
+            <response code="404">Not Found</response>
+            <response code="500">InternalServerError</response>
+        </member>
         <member name="T:Hospital.Migrations.Init">
             <inheritdoc />
         </member>

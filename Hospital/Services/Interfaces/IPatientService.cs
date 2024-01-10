@@ -23,5 +23,7 @@ namespace Hospital.Services.Interfaces
         Task<InspectionPagedListModel> GetInspectionList(Guid patientId, List<Guid> icdRoots, bool grouped, int page, int size);
 
         Task<PatientModel> GetPatient(Guid id);
+
+        Task<List<InspectionShortModel>> GetInspectionsWithoutChildren(Guid patientId, string? request);
     }
 }
