@@ -114,6 +114,22 @@
             <response code="404">Not Found</response>
             <response code="500">InternalServerError</response>
         </member>
+        <member name="M:Hospital.Controllers.PatientController.GetInspectionList(System.Guid,System.Collections.Generic.List{System.Guid},System.Boolean,System.Int32,System.Int32)">
+            <summary>
+            Get a list of patient medical inspections
+            </summary>
+            <param name="id">Patient's identifier</param>
+            <param name="grouped">flag - whether grouping by inspection chain is required - for filtration</param>
+            <param name="icdRoots">root elements for ICD-10 - for filtration</param>
+            <param name="page">page number</param>
+            <param name="size">required number of elements per page</param>
+            <response code="200">Patients inspections list retrieved</response>
+            <response code="400">Invalid arguments for filtration/pagination</response>
+            <response code="401">Unauthorized</response>
+            <response code="403">Can't create new inspection</response>
+            <response code="404">Patient not found</response>
+            <response code="500">InternalServerError</response>
+        </member>
         <member name="M:Hospital.Controllers.PatientController.GetPatient(System.Guid)">
             <summary>
             Get patient card

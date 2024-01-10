@@ -180,6 +180,65 @@ namespace Hospital.Controllers
         }
 
         /// <summary>
+        /// Get a list of patient medical inspections
+        /// </summary>
+        /// <param name="id">Patient's identifier</param>
+        /// <param name="grouped">flag - whether grouping by inspection chain is required - for filtration</param>
+        /// <param name="icdRoots">root elements for ICD-10 - for filtration</param>
+        /// <param name="page">page number</param>
+        /// <param name="size">required number of elements per page</param>
+        /// <response code="200">Patients inspections list retrieved</response>
+        /// <response code="400">Invalid arguments for filtration/pagination</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">Can't create new inspection</response>
+        /// <response code="404">Patient not found</response>
+        /// <response code="500">InternalServerError</response>
+        [HttpGet("{id}/inspections")]
+        [Authorize]
+        [ProducesResponseType(typeof(InspectionPagedListModel), 200)]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
+        public async Task<IActionResult> GetInspectionList(
+            Guid id,
+            [FromQuery] List<Guid> icdRoots,
+            [FromQuery] bool grouped = false,
+            [Range(1, Int32.MaxValue)] int page = 1,
+            [Range(1, Int32.MaxValue)] int size = 5
+            )
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var token = await HttpContext.GetTokenAsync("access_token");
+                _tokenService.ValidateToken(token);
+
+                var list = await _patientService.GetInspectionList(id, icdRoots, grouped, page, size);
+
+                return Ok(list);
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+        }
+
+        /// <summary>
         /// Get patient card
         /// </summary>
         /// <param name="id">Patient's identifier</param>
