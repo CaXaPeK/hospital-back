@@ -127,5 +127,26 @@ namespace Hospital.Services.Logic
 
             return commentEntity.Id;
         }
+
+        public async Task EditComment(Guid commentId, InspectionCommentCreateModel editedComment, Guid doctorId)
+        {
+            var comment = _dbContext.Comments
+                .FirstOrDefault(c => c.Id == commentId);
+
+            if (comment == null)
+            {
+                throw new NotFoundException($"Comment with ID {commentId} not found in the database");
+            }
+
+            if (comment.AuthorId != doctorId)
+            {
+                throw new MethodAccessException("Can't edit a comment of a different doctor");
+            }
+
+            comment.Content = editedComment.Content;
+            comment.ModifiedDate = DateTime.UtcNow;
+
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }
