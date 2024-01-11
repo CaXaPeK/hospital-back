@@ -23,7 +23,7 @@ namespace Hospital.Models.Inspection
 
         public DateTime? NextVisitDate { get; set; }
 
-        public DateTime? DeathTime { get; set; }
+        public DateTime? DeathDate { get; set; }
 
         [Required]
         [MinLength(1)]

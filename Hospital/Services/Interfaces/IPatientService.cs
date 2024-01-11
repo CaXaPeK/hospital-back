@@ -1,5 +1,6 @@
 ﻿using Hospital.Models.Inspection;
 using Hospital.Models.Patient;
+using Hospital.Database.TableModels;
 
 namespace Hospital.Services.Interfaces
 {
