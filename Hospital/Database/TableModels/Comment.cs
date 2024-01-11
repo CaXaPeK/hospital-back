@@ -24,7 +24,7 @@ namespace Hospital.Database.TableModels
 
         public Guid? ParentId { get; set; }
 
-        public Comment Parent { get; set; }
+        public Comment? Parent { get; set; }
 
         public List<Comment> ChildComments { get; set; }
 
