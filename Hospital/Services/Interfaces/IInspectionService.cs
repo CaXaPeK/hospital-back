@@ -6,12 +6,18 @@ namespace Hospital.Services.Interfaces
 {
     public interface IInspectionService
     {
-        public Task<InspectionModel> GetFullInspection(Guid inspectionId);
+        Task<InspectionModel> GetFullInspection(Guid inspectionId);
 
-        public Task EditInspection(Guid inspectionId, InspectionEditModel editedInspection, Guid doctorId);
+        Task EditInspection(Guid inspectionId, InspectionEditModel editedInspection, Guid doctorId);
 
-        public Task<List<InspectionPreviewModel>> GetInspectionChain(Guid rootId);
+        Task<List<InspectionPreviewModel>> GetInspectionChain(Guid rootId);
 
-        public void ValidateCreateInspection(InspectionCreateModel newInspection, Patient patient);
+        void ValidateCreateInspection(InspectionCreateModel newInspection, Patient patient);
+
+        IQueryable<Inspection> FilterInspections(IQueryable<Inspection> inspections, List<Guid> icdRoots, bool grouped);
+
+        IQueryable<Inspection> PaginateInspections(IQueryable<Inspection> inspections, int page, int size);
+
+        InspectionPagedListModel GetPagedFilteredInspectionList(IQueryable<Inspection> inspections, List<Guid> icdRoots, bool grouped, int page, int size);
     }
 }

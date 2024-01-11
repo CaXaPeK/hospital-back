@@ -54,6 +54,7 @@ namespace Hospital
             builder.Services.AddHostedService<DictionaryDataFiller>();
             builder.Services.AddHostedService<BannedTokenAutodeleteMiddleware>();
 
+            builder.Services.AddScoped<IConsultationService, ConsultationService>();
             builder.Services.AddScoped<IDictionaryService, DictionaryService>();
             builder.Services.AddScoped<IDoctorService, DoctorService>();
             builder.Services.AddScoped<IInspectionService, InspectionService>();
