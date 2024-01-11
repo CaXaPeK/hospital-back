@@ -1,12 +1,17 @@
 ﻿using Hospital.Exceptions;
 using Hospital.Models.General;
+using Hospital.Models.Inspection;
+using Hospital.Models.Consultation;
 using Hospital.Services.Interfaces;
 using Hospital.Services.Logic;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
+using System.Drawing;
 using System.Security.Authentication;
+using System.Text.RegularExpressions;
 
 namespace Hospital.Controllers
 {
@@ -37,6 +42,8 @@ namespace Hospital.Controllers
         /// <response code="500">InternalServerError</response>
         [HttpGet]
         [Authorize]
+        [ProducesResponseType(typeof(InspectionPagedListModel), 200)]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
         public async Task<IActionResult> GetYourSpecialityInspections(
             [FromQuery] List<Guid> icdRoots,
             [FromQuery] bool grouped = false,
@@ -58,6 +65,53 @@ namespace Hospital.Controllers
                 var list = await _consultationService.GetYourSpecialityInspections(doctorId, icdRoots, grouped, page, size);
 
                 return Ok(list);
+            }
+            catch (InvalidCredentialException e)
+            {
+                return BadRequest(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get concrete consultation
+        /// </summary>
+        /// <param name="id">Consultation's identifier</param>
+        /// <response code="200">Success</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">InternalServerError</response>
+        [HttpGet("{id}")]
+        [Authorize]
+        [ProducesResponseType(typeof(ConsultationModel), 200)]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
+        public async Task<IActionResult> GetConsultation(Guid id)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var token = await HttpContext.GetTokenAsync("access_token");
+                _tokenService.ValidateToken(token);
+
+                var consultation = await _consultationService.GetConsultation(id);
+
+                return Ok(consultation);
             }
             catch (InvalidCredentialException e)
             {

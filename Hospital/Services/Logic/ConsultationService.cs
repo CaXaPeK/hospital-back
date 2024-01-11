@@ -1,7 +1,10 @@
 ﻿using Hospital.Database;
 using Hospital.Exceptions;
+using Hospital.Models.Comment;
+using Hospital.Models.Consultation;
 using Hospital.Models.General;
 using Hospital.Models.Inspection;
+using Hospital.Models.Speciality;
 using Hospital.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Authentication;
@@ -36,6 +39,45 @@ namespace Hospital.Services.Logic
             var list = _inspectionService.GetPagedFilteredInspectionList(inspections, icdRoots, grouped, page, size);
 
             return list;
+        }
+
+        public async Task<ConsultationModel> GetConsultation(Guid id)
+        {
+            var consultation = _dbContext.Consultations
+                .Include(c => c.Speciality)
+                .Include(c => c.Comments).ThenInclude(c => c.Author)
+                .FirstOrDefault(c => c.Id == id);
+
+            if (consultation == null)
+            {
+                throw new NotFoundException($"Consultation with ID {id} not found in the database");
+            }
+
+            var consultationModel = new ConsultationModel
+            {
+                Id = consultation.Id,
+                CreateTime = consultation.CreateTime,
+                InspectionId = consultation.InspectionId,
+                Speciality = new SpecialityModel
+                {
+                    Id = consultation.Speciality.Id,
+                    CreateTime = consultation.Speciality.CreateDate,
+                    Name = consultation.Speciality.Name
+                },
+                Comments = consultation.Comments
+                    .Select(comment => new CommentModel
+                    {
+                        Id = comment.Id,
+                        CreateTime = comment.CreateTime,
+                        ModifiedDate = comment.ModifiedDate,
+                        Content = comment.Content,
+                        AuthorId = comment.AuthorId,
+                        Author = comment.Author.Name,
+                        ParentId = comment.ParentId
+                    }).ToList()
+            };
+
+            return consultationModel;
         }
     }
 }
