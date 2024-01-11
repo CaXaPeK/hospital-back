@@ -19,12 +19,14 @@ namespace Hospital.Services.Logic
     {
         private readonly AppDbContext _dbContext;
         private readonly IDictionaryService _dictionaryService;
+        private readonly IInspectionService _inspectionService;
         private readonly ITokenService _tokenService;
 
-        public PatientService(AppDbContext dbContext, IDictionaryService dictionaryService, ITokenService tokenService)
+        public PatientService(AppDbContext dbContext, IDictionaryService dictionaryService, IInspectionService inspectionService, ITokenService tokenService)
         {
             _dbContext = dbContext;
             _dictionaryService = dictionaryService;
+            _inspectionService = inspectionService;
             _tokenService = tokenService;
         }
 
@@ -98,7 +100,9 @@ namespace Hospital.Services.Logic
 
         public async Task<Guid> CreateInspection(InspectionCreateModel newInspection, Guid patientId, Guid authorId)
         {
-            var patient = FindPatient(patientId);
+            var patient = _dbContext.Patients
+                .Include(p => p.Inspections)
+                .FirstOrDefault(p => p.Id == patientId);
 
             if (patient == null)
             {
@@ -153,19 +157,31 @@ namespace Hospital.Services.Logic
                 consultations.Add(consultationEntity);
                 _dbContext.Consultations.Add(consultationEntity);
                 _dbContext.Comments.Add(newComment);
+
+                _dbContext.Doctors.First(d => d.Id == authorId).Comments.Add(newComment);
+                _dbContext.Doctors.First(d => d.Id == authorId).Consultations.Add(consultationEntity);
             }
 
-            var baseInspectionId = new Guid();
+            var baseInspectionId = new Guid?();
 
             if (newInspection.PreviousInspectionId == null)
             {
-                baseInspectionId = newInspectionId;
+                baseInspectionId = null;
             }
             else
             {
-                var previousInspection = FindInspection(newInspection.PreviousInspectionId.Value);
+                var previousInspection = patient.Inspections.First(i => i.Id == newInspection.PreviousInspectionId.Value);
 
-                baseInspectionId = previousInspection.BaseInspectionId;
+                if (previousInspection.BaseInspectionId == null)
+                {
+                    baseInspectionId = previousInspection.Id;
+                }
+                else
+                {
+                    baseInspectionId = previousInspection.BaseInspectionId;
+                }
+
+                previousInspection.BaseInspectionId = baseInspectionId;
             }
 
             var inspection = new Inspection
@@ -184,7 +200,7 @@ namespace Hospital.Services.Logic
                 Diagnoses = diagnoses,
                 Consultations = consultations,
                 PatientId = patientId,
-                AuthorId = authorId
+                DoctorId = authorId
             };
 
             await _dbContext.Inspections.AddAsync(inspection);
@@ -196,7 +212,9 @@ namespace Hospital.Services.Logic
 
         public async Task<InspectionPagedListModel> GetInspectionList(Guid patientId, List<Guid> icdRoots, bool grouped, int page, int size)
         {
-            var patient = FindPatient(patientId);
+            var patient = _dbContext.Patients
+                .Include(p => p.Inspections)
+                .FirstOrDefault(p => p.Id == patientId);
 
             if (patient == null)
             {
@@ -204,7 +222,8 @@ namespace Hospital.Services.Logic
             }
 
             var inspections = _dbContext.Inspections
-                .Where(i => i.PatientId == patientId)
+                .Include(i => i.Diagnoses).ThenInclude(d => d.IcdDiagnosis)
+                .Where(i => i.Patient == patient)
                 .AsQueryable();
 
             var filteredInspections = ApplyInspectionFilters(inspections, icdRoots, grouped);
@@ -230,17 +249,13 @@ namespace Hospital.Services.Logic
                         PreviousId = inspection.PreviousInspectionId,
                         Date = inspection.Date,
                         Conclusion = inspection.Conclusion,
-                        DoctorId = inspection.AuthorId,
-                        Doctor = _dbContext.Doctors.First(d => d.Id == inspection.AuthorId).Name,
+                        DoctorId = inspection.DoctorId,
+                        Doctor = _dbContext.Doctors.First(d => d.Id == inspection.DoctorId).Name,
                         PatientId = inspection.PatientId,
                         Patient = _dbContext.Patients.First(p => p.Id == inspection.PatientId).Name,
-                        Diagnosis = CreateDiagnosisModel
-                        (
-                            inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main),
-                            _dbContext.Diagnoses.First(icdD => icdD.Id == inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main).IcdDiagnosisId)
-                        ),
-                        HasChain = inspection.BaseInspectionId == inspection.Id,
-                        HasNested = _dbContext.Inspections.Any(i => i.PreviousInspectionId == inspection.Id)
+                        Diagnosis = CreateMainDiagnosisModel(inspection),
+                        HasChain = inspection.PreviousInspectionId == null,
+                        HasNested = inspection.NextInspectionId != null
                     })
                     .ToList(),
                 Pagination = new PageInfoModel
@@ -256,7 +271,8 @@ namespace Hospital.Services.Logic
 
         public async Task<PatientModel> GetPatient(Guid id)
         {
-            var patient = FindPatient(id);
+            var patient = _dbContext.Patients
+                .FirstOrDefault(p => p.Id == id);
 
             if (patient == null)
             {
@@ -276,7 +292,8 @@ namespace Hospital.Services.Logic
 
         public async Task<List<InspectionShortModel>> GetInspectionsWithoutChildren(Guid patientId, string? request)
         {
-            var patient = FindPatient(patientId);
+            var patient = _dbContext.Patients
+                .FirstOrDefault(p => p.Id == patientId);
 
             if (patient == null)
             {
@@ -284,15 +301,17 @@ namespace Hospital.Services.Logic
             }
 
             var inspections = _dbContext.Inspections
+                .Include(i => i.Diagnoses).ThenInclude(d => d.IcdDiagnosis)
                 .Where(i => i.PatientId == patientId)
                 .AsQueryable();
 
             inspections = inspections
-                .Where(i => !_dbContext.Inspections.Any(i => i.PreviousInspectionId == i.Id));
+                .Where(i => i.NextInspectionId == null);
 
             if (request != "" && request != null)
             {
-                inspections = SearchMatchingDiagnosisNameOrCode(inspections, request);
+                inspections = inspections
+                    .Where(i => MainDiagnosisMatchesNameOrCode(i, request));
             }
 
             var list = inspections
@@ -301,20 +320,11 @@ namespace Hospital.Services.Logic
                     Id = inspection.Id,
                     CreateTime = inspection.CreateTime,
                     Date = inspection.Date,
-                    Diagnosis = CreateDiagnosisModel
-                    (
-                        inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main),
-                        _dbContext.Diagnoses.First(icdD => icdD.Id == inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main).IcdDiagnosisId)
-                    )
+                    Diagnosis = CreateMainDiagnosisModel(inspection)
                 })
                 .ToList();
 
             return list;
-        }
-
-        private bool InspectionHasChild(Guid inspectionId)
-        {
-            return _dbContext.Inspections.Any(i => i.PreviousInspectionId == inspectionId);
         }
 
         private IQueryable<Inspection> SearchMatchingDiagnosisNameOrCode(IQueryable<Inspection> inspections, string request)
@@ -325,14 +335,24 @@ namespace Hospital.Services.Logic
                         && (icdD.MkbName.ToLower().Contains(request.ToLower()) || icdD.MkbCode.ToLower().Contains(request.ToLower()))));
         }
 
-        private static DiagnosisModel CreateDiagnosisModel(InspectionDiagnosis diagnosis, Diagnosis icdDiagnosis)
+        private bool MainDiagnosisMatchesNameOrCode(Inspection inspection, string request)
         {
+            var diagnosis = inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main).IcdDiagnosis;
+
+            return diagnosis.MkbName.ToLower().Contains(request.ToLower())
+                || diagnosis.MkbCode.ToLower().Contains(request.ToLower());
+        }
+
+        private static DiagnosisModel CreateMainDiagnosisModel(Inspection inspection)
+        {
+            var diagnosis = inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main);
+
             return new DiagnosisModel
             {
                 Id = diagnosis.Id,
                 CreateTime = diagnosis.CreateTime,
-                Code = icdDiagnosis.MkbCode,
-                Name = icdDiagnosis.MkbName,
+                Code = diagnosis.IcdDiagnosis.MkbCode,
+                Name = diagnosis.IcdDiagnosis.MkbName,
                 Description = diagnosis.Description,
                 Type = DiagnosisType.Main
             };
@@ -350,7 +370,7 @@ namespace Hospital.Services.Logic
         {
             if (name != "" && name != null)
             {
-                patients = patients.Where(x => x.Name.ToLower().Contains(name.ToLower()));
+                patients = patients.Where(p => p.Name.ToLower().Contains(name.ToLower()));
             }
 
             if (conclusions.Count != 0)
@@ -363,13 +383,13 @@ namespace Hospital.Services.Logic
             {
                 patients = patients
                     .Where(p => p.Inspections
-                        .Any(i => i.NextVisitDate != null && !p.Inspections.Any(ii => ii.PreviousInspectionId == i.Id)));
+                        .Any(i => i.NextVisitDate != null && i.NextInspectionId == null));
             }
 
             if (onlyMine)
             {
                 patients = patients
-                    .Where(p => p.Inspections.Any(i => i.AuthorId == doctorId));
+                    .Where(p => p.Inspections.Any(i => i.DoctorId == doctorId));
             }
 
             switch (sorting)
@@ -424,7 +444,7 @@ namespace Hospital.Services.Logic
 
                 inspections = inspections
                     .Where(i => i.Diagnoses.Any(d => d.Type == DiagnosisType.Main
-                            && icdRootCodes.Contains(_dbContext.Diagnoses.FirstOrDefault(icdD => icdD.Id == d.IcdDiagnosisId).MkbCode)));
+                            && icdRootCodes.Contains(d.IcdDiagnosis.MkbCode)));
             }
 
             if (grouped)
@@ -438,23 +458,26 @@ namespace Hospital.Services.Logic
 
         private void ValidateInspection(InspectionCreateModel newInspection, Patient patient)
         { 
-            if (HasDeathInspection(patient.Id))
+            if (HasDeathInspection(patient))
             {
-                throw new MethodAccessException($"Patient with ID {patient.Id} already has an inspection with a Death conclusion. Can't create new inspections");
+                throw new InvalidCredentialException($"Patient with ID {patient.Id} already has an inspection with a Death conclusion. Can't create new inspections");
             }
 
             if (newInspection.PreviousInspectionId != null)
             {
-                var previousInspection = FindInspection(newInspection.PreviousInspectionId.Value);
+                var previousInspection = _dbContext.Inspections.FirstOrDefault(i => i.Id == newInspection.PreviousInspectionId.Value);
 
                 if (previousInspection == null)
                 {
                     throw new NotFoundException($"Previous inspection with ID {newInspection.PreviousInspectionId.Value} not found in the database");
                 }
 
-                var prevInspectionId = newInspection.PreviousInspectionId.Value;
+                if (previousInspection.Patient != patient)
+                {
+                    throw new InvalidCredentialException($"Previous inspection is not this patient's inspection");
+                }
 
-                if (_dbContext.Inspections.Any(i => i.PreviousInspectionId == prevInspectionId))
+                if (_dbContext.Inspections.First(i => i == previousInspection).NextInspectionId != null)
                 {
                     throw new InvalidCredentialException($"Child inspection already exists for inspection {previousInspection.Id}");
                 }
@@ -534,10 +557,10 @@ namespace Hospital.Services.Logic
             }
         }
 
-        private bool HasDeathInspection(Guid patientId)
+        private bool HasDeathInspection(Patient patient)
         {
-            return _dbContext.Inspections
-                .Any(i => i.Conclusion == Conclusion.Death && i.PatientId == patientId);
+            return patient.Inspections
+                .Any(i => i.Conclusion == Conclusion.Death);
         }
 
         private int MainDiagnosesCount(List<DiagnosisCreateModel> diagnoses)

@@ -1,6 +1,7 @@
 ﻿using Hospital.Models.Inspection;
 using Hospital.Validation;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Hospital.Database.TableModels
 {
@@ -35,10 +36,17 @@ namespace Hospital.Database.TableModels
 
         public DateTime? DeathDate { get; set; }
 
-        [Required]
-        public Guid BaseInspectionId { get; set; }
+        public Guid? BaseInspectionId { get; set; }
+
+        public Inspection BaseInspection { get; set; }
 
         public Guid? PreviousInspectionId { get; set; }
+
+        public Inspection PreviousInspection { get; set; }
+
+        public Guid? NextInspectionId { get; set; }
+
+        public Inspection NextInspection { get; set; }
 
         [Required]
         public List<InspectionDiagnosis> Diagnoses { get; set; }
@@ -48,7 +56,11 @@ namespace Hospital.Database.TableModels
         [Required]
         public Guid PatientId { get; set; }
 
+        public Patient Patient { get; set; }
+
         [Required]
-        public Guid AuthorId { get; set; }
+        public Guid DoctorId { get; set; }
+
+        public Doctor Doctor { get; set; }
     }
 }

@@ -14,6 +14,10 @@ namespace Hospital.Database.TableModels
         [Required]
         public Guid IcdDiagnosisId { get; set; }
 
+        public Diagnosis IcdDiagnosis { get; set; }
+
+        public Inspection Inspection { get; set; }
+
         [MaxLength(5000)]
         public string? Description { get; set; }
 

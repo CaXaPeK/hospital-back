@@ -13,8 +13,12 @@ namespace Hospital.Database.TableModels
         [Required]
         public Guid InspectionId { get; set; }
 
+        public Inspection Inspection { get; set; }
+
         [Required]
         public Guid SpecialityId { get; set; }
+
+        public Speciality Speciality { get; set; }
 
         [Required]
         public List<Comment> Comments { get; set; }

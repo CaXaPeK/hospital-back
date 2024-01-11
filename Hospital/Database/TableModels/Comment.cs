@@ -20,9 +20,17 @@ namespace Hospital.Database.TableModels
         [Required]
         public Guid AuthorId { get; set; }
 
+        public Doctor Author { get; set; }
+
         public Guid? ParentId { get; set; }
+
+        public Comment Parent { get; set; }
+
+        public List<Comment> ChildComments { get; set; }
 
         [Required]
         public Guid ConsultationId { get; set; }
+
+        public Consultation Consultation { get; set; }
     }
 }

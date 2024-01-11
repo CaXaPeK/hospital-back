@@ -30,6 +30,24 @@ namespace Hospital.Database
         {
             modelBuilder.Entity<Diagnosis>().HasIndex(x => x.Id);
 
+            modelBuilder.Entity<Inspection>()
+                .HasOne(i => i.BaseInspection)
+                .WithMany()
+                .HasForeignKey(i => i.BaseInspectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Inspection>()
+                .HasOne(i => i.NextInspection)
+                .WithMany()
+                .HasForeignKey(i => i.NextInspectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Inspection>()
+                .HasOne(i => i.PreviousInspection)
+                .WithMany()
+                .HasForeignKey(i => i.PreviousInspectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             base.OnModelCreating(modelBuilder);
         }
     }
