@@ -38,15 +38,15 @@ namespace Hospital.Database.TableModels
 
         public Guid? BaseInspectionId { get; set; }
 
-        public Inspection BaseInspection { get; set; }
+        public Inspection? BaseInspection { get; set; }
 
         public Guid? PreviousInspectionId { get; set; }
 
-        public Inspection PreviousInspection { get; set; }
+        public Inspection? PreviousInspection { get; set; }
 
         public Guid? NextInspectionId { get; set; }
 
-        public Inspection NextInspection { get; set; }
+        public Inspection? NextInspection { get; set; }
 
         [Required]
         public List<InspectionDiagnosis> Diagnoses { get; set; }

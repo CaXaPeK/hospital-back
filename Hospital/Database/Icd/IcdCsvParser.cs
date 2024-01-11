@@ -83,7 +83,6 @@ namespace Hospital.Database.Icd
                     if (firstCode != "")
                     {
                         dict.Add(curGroup, '\"' + firstCode + '-' + lastCode + '\"');
-                        Console.WriteLine(curGroup + ' ' + firstCode + '-' + lastCode);
                     }
 
                     curGroup = MkbCode(lines[i]);
@@ -104,8 +103,6 @@ namespace Hospital.Database.Icd
             }
 
             dict.Add(curGroup, firstCode + '-' + lastCode);
-            Console.WriteLine(curGroup + ' ' + firstCode + '-' + lastCode);
-            Console.ReadKey();
 
             for (int i = 1; i < lines.Count; i++)
             {

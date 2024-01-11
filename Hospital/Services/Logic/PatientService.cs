@@ -158,8 +158,12 @@ namespace Hospital.Services.Logic
                 _dbContext.Consultations.Add(consultationEntity);
                 _dbContext.Comments.Add(newComment);
 
-                _dbContext.Doctors.First(d => d.Id == authorId).Comments.Add(newComment);
-                _dbContext.Doctors.First(d => d.Id == authorId).Consultations.Add(consultationEntity);
+                var doctor = _dbContext.Doctors
+                    .Include(d => d.Consultations)
+                    .First(d => d.Id == authorId);
+
+                doctor.Comments.Add(newComment);
+                doctor.Consultations.Add(consultationEntity);
             }
 
             var baseInspectionId = new Guid?();
@@ -181,7 +185,7 @@ namespace Hospital.Services.Logic
                     baseInspectionId = previousInspection.BaseInspectionId;
                 }
 
-                previousInspection.BaseInspectionId = baseInspectionId;
+                previousInspection.NextInspectionId = newInspectionId;
             }
 
             var inspection = new Inspection
@@ -327,14 +331,6 @@ namespace Hospital.Services.Logic
             return list;
         }
 
-        private IQueryable<Inspection> SearchMatchingDiagnosisNameOrCode(IQueryable<Inspection> inspections, string request)
-        {
-            return inspections
-                .Where(i => _dbContext.Diagnoses
-                    .Any(icdD => icdD.Id == i.Diagnoses.First(d => d.Type == DiagnosisType.Main).IcdDiagnosisId
-                        && (icdD.MkbName.ToLower().Contains(request.ToLower()) || icdD.MkbCode.ToLower().Contains(request.ToLower()))));
-        }
-
         private bool MainDiagnosisMatchesNameOrCode(Inspection inspection, string request)
         {
             var diagnosis = inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main).IcdDiagnosis;
@@ -444,7 +440,7 @@ namespace Hospital.Services.Logic
 
                 inspections = inspections
                     .Where(i => i.Diagnoses.Any(d => d.Type == DiagnosisType.Main
-                            && icdRootCodes.Contains(d.IcdDiagnosis.MkbCode)));
+                            && icdRootCodes.Contains(d.IcdDiagnosis.RootCode)));
             }
 
             if (grouped)
