@@ -212,7 +212,7 @@ namespace Hospital.Controllers
 
                 return Ok(list);
             }
-            catch (InvalidOperationException e)
+            catch (InvalidCredentialException e)
             {
                 return BadRequest(new ResponseModel { Status = "Error", Message = e.Message });
             }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using System.Drawing;
+using System.Security.Authentication;
 
 namespace Hospital.Services.Logic
 {
@@ -38,7 +39,7 @@ namespace Hospital.Services.Logic
             //вроде в вашем API такая же логика
             if (page > pageCount && pageCount != 0)
             {
-                throw new InvalidOperationException("Invalid page");
+                throw new InvalidCredentialException("Invalid page");
             }
 
             var dto = new SpecialtiesPagedListModel
@@ -95,7 +96,7 @@ namespace Hospital.Services.Logic
 
             if (page > pageCount && pageCount != 0)
             {
-                throw new InvalidOperationException("Invalid page");
+                throw new InvalidCredentialException("Invalid page");
             }
 
             var dto = new Icd10SearchModel
