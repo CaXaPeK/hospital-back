@@ -35,9 +35,8 @@ namespace Hospital.Services.Logic
 
             var pageCount = (int)Math.Ceiling((double)specialities.Count() / size);
 
-            pageCount = pageCount == 0 ? 1 : pageCount;
-
-            if (page > pageCount)
+            //вроде в вашем API такая же логика
+            if (page > pageCount && pageCount != 0)
             {
                 throw new InvalidOperationException("Invalid page");
             }
@@ -94,9 +93,7 @@ namespace Hospital.Services.Logic
 
             var pageCount = (int)Math.Ceiling((double)diagnoses.Count() / size);
 
-            pageCount = pageCount == 0 ? 1 : pageCount;
-
-            if (page > pageCount)
+            if (page > pageCount && pageCount != 0)
             {
                 throw new InvalidOperationException("Invalid page");
             }

@@ -247,6 +247,11 @@ namespace Hospital.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
                 var token = await HttpContext.GetTokenAsync("access_token");
                 _tokenService.ValidateToken(token);
 
@@ -287,6 +292,11 @@ namespace Hospital.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
                 var token = await HttpContext.GetTokenAsync("access_token");
                 _tokenService.ValidateToken(token);
 

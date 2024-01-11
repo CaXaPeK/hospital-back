@@ -181,6 +181,73 @@ namespace Hospital.Services.Logic
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task<List<InspectionPreviewModel>> GetInspectionChain(Guid rootId)
+        {
+            var rootInspection = _dbContext.Inspections
+                .FirstOrDefault(i => i.Id == rootId);
+
+            if (rootInspection == null)
+            {
+                throw new NotFoundException($"Inspection with ID {rootId} not found in the database");
+            }
+
+            if (rootInspection.PreviousInspectionId != null)
+            {
+                throw new InvalidOperationException($"Inspection with ID {rootId} is not a root inspection");
+            }
+
+            //в вашем API в таком случае выводится пустой список
+            /*if (rootInspection.PreviousInspectionId == null && rootInspection.NextInspectionId == null)
+            {
+                throw new NotFoundException($"Inspection with ID {rootId} doesn't have a chain");
+            }*/
+
+            var inspection = rootInspection;
+            var inspectionChain = new List<InspectionPreviewModel>();
+
+            while (inspection.NextInspectionId != null)
+            {
+                inspection = _dbContext.Inspections
+                .Include(i => i.Doctor)
+                .Include(i => i.Patient)
+                .Include(i => i.Diagnoses).ThenInclude(d => d.IcdDiagnosis)
+                .FirstOrDefault(i => i.Id == inspection.NextInspectionId);
+
+                inspectionChain.Add(new InspectionPreviewModel
+                {
+                    Id = inspection.Id,
+                    CreateTime = inspection.CreateTime,
+                    PreviousId = inspection.PreviousInspectionId,
+                    Date = inspection.Date,
+                    Conclusion = inspection.Conclusion,
+                    DoctorId = inspection.DoctorId,
+                    Doctor = inspection.Doctor.Name,
+                    PatientId = inspection.PatientId,
+                    Patient = inspection.Patient.Name,
+                    Diagnosis = CreateMainDiagnosisModel(inspection),
+                    HasChain = inspection.PreviousInspectionId == null,
+                    HasNested = inspection.NextInspectionId != null
+                });
+            }
+
+            return inspectionChain;
+        }
+
+        private static DiagnosisModel CreateMainDiagnosisModel(Inspection inspection)
+        {
+            var diagnosis = inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main);
+
+            return new DiagnosisModel
+            {
+                Id = diagnosis.Id,
+                CreateTime = diagnosis.CreateTime,
+                Code = diagnosis.IcdDiagnosis.MkbCode,
+                Name = diagnosis.IcdDiagnosis.MkbName,
+                Description = diagnosis.Description,
+                Type = DiagnosisType.Main
+            };
+        }
+
         public void ValidateCreateInspection(InspectionCreateModel newInspection, Patient patient)
         {
             ValidateDiagnoses(newInspection.Diagnoses);
@@ -296,7 +363,7 @@ namespace Hospital.Services.Logic
             }
         }
 
-        public int MainDiagnosesCount(List<DiagnosisCreateModel> diagnoses)
+        private int MainDiagnosesCount(List<DiagnosisCreateModel> diagnoses)
         {
             int count = 0;
 
