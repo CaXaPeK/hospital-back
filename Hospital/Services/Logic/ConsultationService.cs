@@ -1,4 +1,5 @@
 ﻿using Hospital.Database;
+using Hospital.Database.TableModels;
 using Hospital.Exceptions;
 using Hospital.Models.Comment;
 using Hospital.Models.Consultation;
@@ -78,6 +79,53 @@ namespace Hospital.Services.Logic
             };
 
             return consultationModel;
+        }
+
+        public async Task<Guid> AddComment(Guid consultationId, CommentCreateModel newComment, Guid doctorId)
+        {
+            var consultation = _dbContext.Consultations
+                .Include(c => c.Inspection)
+                .FirstOrDefault(c => c.Id == consultationId);
+
+            if (consultation == null)
+            {
+                throw new NotFoundException($"Parent comment with ID {consultationId} not found in the database");
+            }
+
+            var parentComment = _dbContext.Comments
+                .FirstOrDefault(c => c.Id == newComment.ParentId);
+
+            if (parentComment == null)
+            {
+                throw new NotFoundException($"Parent comment with ID {newComment.ParentId} not found in the database");
+            }
+
+            var doctor = _dbContext.Doctors
+                .First(d => d.Id == doctorId);
+
+            if (doctor.Speciality != consultation.Speciality && doctor != consultation.Inspection.Doctor)
+            {
+                throw new MethodAccessException($"Can't leave a comment: You should be the inspection's author or have a speciality of ID {consultation.SpecialityId}");
+            }
+
+            var commentEntity = new Comment
+            {
+                Id = Guid.NewGuid(),
+                CreateTime = DateTime.UtcNow,
+                Content = newComment.Content,
+                Author = doctor,
+                Parent = parentComment,
+                Consultation = consultation
+            };
+
+            _dbContext.Comments.Add(commentEntity);
+            parentComment.ChildComments.Add(commentEntity);
+            consultation.Comments.Add(commentEntity);
+            doctor.Comments.Add(commentEntity);
+
+            await _dbContext.SaveChangesAsync();
+
+            return commentEntity.Id;
         }
     }
 }
