@@ -140,7 +140,7 @@
             <response code="404">Not Found</response>
             <response code="500">InternalServerError</response>
         </member>
-        <member name="M:Hospital.Controllers.PatientController.SearchInspections(System.Guid,System.String)">
+        <member name="M:Hospital.Controllers.PatientController.GetInspectionsWithoutChildren(System.Guid,System.String)">
             <summary>
             Search for patient medical inspections without child inspections
             </summary>
@@ -281,6 +281,30 @@
             <inheritdoc />
         </member>
         <member name="M:Hospital.Migrations.MinorChanges2.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Hospital.Migrations.AddEntityLinks">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.AddEntityLinks.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.AddEntityLinks.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.AddEntityLinks.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Hospital.Migrations.MoveToDifferentDb">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.MoveToDifferentDb.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.MoveToDifferentDb.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Hospital.Migrations.MoveToDifferentDb.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
     </members>

@@ -18,7 +18,6 @@ namespace Hospital.Controllers
     public class PatientController : ControllerBase
     {
         private readonly IPatientService _patientService;
-
         private readonly ITokenService _tokenService;
 
         public PatientController(IPatientService patientService, ITokenService tokenService)
@@ -290,8 +289,7 @@ namespace Hospital.Controllers
 
         [ProducesResponseType(typeof(InspectionShortModel), 200)]
         [ProducesResponseType(typeof(ResponseModel), 500)]
-        public async Task<IActionResult> GetInspectionsWithoutChildren(Guid id, [FromQuery] string? request
-            )
+        public async Task<IActionResult> GetInspectionsWithoutChildren(Guid id, [FromQuery] string? request)
         {
             try
             {

@@ -36,6 +36,14 @@ namespace Hospital.Database.TableModels
         public string? Phone { get; set; }
 
         [Required]
-        public Guid Speciality { get; set; }
+        public Guid SpecialityId { get; set; }
+
+        public Speciality Speciality { get; set; }
+
+        public List<Inspection> Inspections { get; set; }
+
+        public List<Consultation> Consultations { get; set; }
+
+        public List<Comment> Comments { get; set; }
     }
 }

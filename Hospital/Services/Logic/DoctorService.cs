@@ -49,7 +49,7 @@ namespace Hospital.Services.Logic
                 BirthDate = newDoctor.Birthday,
                 Gender = newDoctor.Gender,
                 Phone = newDoctor.Phone,
-                Speciality = newDoctor.Speciality
+                SpecialityId = newDoctor.Speciality
             };
 
             await _dbContext.Doctors.AddAsync(doctor);

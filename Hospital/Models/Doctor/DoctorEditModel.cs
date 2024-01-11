@@ -23,7 +23,7 @@ namespace Hospital.Models.Doctor
         public Gender Gender { get; set; }
 
         [RegularExpression("^\\+7 \\(\\d{3}\\) \\d{3}-\\d{2}-\\d{2}$",
-            ErrorMessage = "PhoneNumber is not valid")]
+            ErrorMessage = "Phone number must be in a format of \"+7 (xxx) xxx-xx-xx\"")]
         public string? Phone { get; set; }
     }
 }
