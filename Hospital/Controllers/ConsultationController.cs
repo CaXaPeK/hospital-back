@@ -160,9 +160,63 @@ namespace Hospital.Controllers
                 _tokenService.ValidateToken(token);
                 var doctorId = _tokenService.GetDoctorId(token);
 
-                var consultation = await _consultationService.AddComment(id, data, doctorId);
+                var newCommentId = await _consultationService.AddComment(id, data, doctorId);
 
-                return Ok(consultation);
+                return Ok(newCommentId);
+            }
+            catch (InvalidCredentialException e)
+            {
+                return BadRequest(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (MethodAccessException e)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+        }
+
+        /// <summary>
+        /// Edit comment
+        /// </summary>
+        /// <param name="id">Comment's identifier</param>
+        /// <response code="200">Success</response>
+        /// <response code="400">Invalid arguments</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">User is not the author of the comment</response>
+        /// <response code="404">Comment not found</response>
+        /// <response code="500">InternalServerError</response>
+        [HttpPut("comment/{id}")]
+        [Authorize]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
+        public async Task<IActionResult> EditComment(Guid id, InspectionCommentCreateModel data)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var token = await HttpContext.GetTokenAsync("access_token");
+                _tokenService.ValidateToken(token);
+                var doctorId = _tokenService.GetDoctorId(token);
+
+                await _consultationService.EditComment(id, data, doctorId);
+
+                return Ok();
             }
             catch (InvalidCredentialException e)
             {

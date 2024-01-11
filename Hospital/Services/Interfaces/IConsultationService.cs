@@ -11,5 +11,7 @@ namespace Hospital.Services.Interfaces
         Task<ConsultationModel> GetConsultation(Guid id);
 
         Task<Guid> AddComment(Guid consultationId, CommentCreateModel newComment, Guid doctorId);
+
+        Task EditComment(Guid commentId, InspectionCommentCreateModel editedComment, Guid doctorId);
     }
 }
