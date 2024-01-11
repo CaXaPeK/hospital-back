@@ -39,6 +39,11 @@ namespace Hospital.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
                 var token = await HttpContext.GetTokenAsync("access_token");
                 _tokenService.ValidateToken(token);
 
@@ -103,6 +108,52 @@ namespace Hospital.Controllers
             {
                 return StatusCode(StatusCodes.Status403Forbidden,
                     new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get medical inspection chain for root inspection
+        /// </summary>
+        /// <param name="id">Root inspection's identifier</param>
+        /// <response code="200">Success</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">InternalServerError</response>
+        [HttpGet("{id}/chain")]
+        [Authorize]
+        public async Task<IActionResult> GetInspectionChain(Guid id)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var token = await HttpContext.GetTokenAsync("access_token");
+                _tokenService.ValidateToken(token);
+
+                var chain = await _inspectionService.GetInspectionChain(id);
+
+                return Ok(chain);
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
             }
             catch (NotFoundException e)
             {

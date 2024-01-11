@@ -68,9 +68,7 @@ namespace Hospital.Services.Logic
 
             var pageCount = (int)Math.Ceiling((double)filteredPatients.Count() / size);
 
-            pageCount = pageCount == 0 ? 1 : pageCount;
-
-            if (page > pageCount)
+            if (page > pageCount && pageCount != 0)
             {
                 throw new InvalidOperationException("Invalid page");
             }
@@ -236,9 +234,7 @@ namespace Hospital.Services.Logic
 
             var pageCount = (int)Math.Ceiling((double)filteredInspections.Count() / size);
 
-            pageCount = pageCount == 0 ? 1 : pageCount;
-
-            if (page > pageCount)
+            if (page > pageCount && pageCount != 0)
             {
                 throw new InvalidOperationException("Invalid page");
             }
@@ -331,14 +327,6 @@ namespace Hospital.Services.Logic
             return list;
         }
 
-        private bool MainDiagnosisMatchesNameOrCode(Inspection inspection, string request)
-        {
-            var diagnosis = inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main).IcdDiagnosis;
-
-            return diagnosis.MkbName.ToLower().Contains(request.ToLower())
-                || diagnosis.MkbCode.ToLower().Contains(request.ToLower());
-        }
-
         private static DiagnosisModel CreateMainDiagnosisModel(Inspection inspection)
         {
             var diagnosis = inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main);
@@ -352,6 +340,14 @@ namespace Hospital.Services.Logic
                 Description = diagnosis.Description,
                 Type = DiagnosisType.Main
             };
+        }
+
+        private bool MainDiagnosisMatchesNameOrCode(Inspection inspection, string request)
+        {
+            var diagnosis = inspection.Diagnoses.First(d => d.Type == DiagnosisType.Main).IcdDiagnosis;
+
+            return diagnosis.MkbName.ToLower().Contains(request.ToLower())
+                || diagnosis.MkbCode.ToLower().Contains(request.ToLower());
         }
 
         private IQueryable<Patient> ApplyPatientFilters(

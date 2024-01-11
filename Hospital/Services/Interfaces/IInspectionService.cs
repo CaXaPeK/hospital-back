@@ -10,8 +10,8 @@ namespace Hospital.Services.Interfaces
 
         public Task EditInspection(Guid inspectionId, InspectionEditModel editedInspection, Guid doctorId);
 
-        public void ValidateCreateInspection(InspectionCreateModel newInspection, Patient patient);
+        public Task<List<InspectionPreviewModel>> GetInspectionChain(Guid rootId);
 
-        public int MainDiagnosesCount(List<DiagnosisCreateModel> diagnoses);
+        public void ValidateCreateInspection(InspectionCreateModel newInspection, Patient patient);
     }
 }
