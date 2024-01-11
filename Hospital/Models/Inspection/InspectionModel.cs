@@ -21,7 +21,7 @@ namespace Hospital.Models.Inspection
 
         public string? Treatment { get; set; }
 
-        public Conclusion Consclusion { get; set; }
+        public Conclusion Conclusion { get; set; }
 
         public DateTime? NextVisitDate { get; set; }
 

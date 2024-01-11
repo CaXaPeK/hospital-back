@@ -130,7 +130,6 @@ namespace Hospital.Controllers
         /// <response code="200">Success</response>
         /// <response code="400">Bad Request</response>
         /// <response code="401">Unauthorized</response>
-        /// <response code="403">Can't create new inspection</response>
         /// <response code="404">Not Found</response>
         /// <response code="500">InternalServerError</response>
         [HttpPost("{id}/inspections")]
@@ -161,11 +160,6 @@ namespace Hospital.Controllers
             catch (UnauthorizedAccessException e)
             {
                 return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
-            }
-            catch (MethodAccessException e)
-            {
-                return StatusCode(StatusCodes.Status403Forbidden,
-                    new ResponseModel { Status = "Error", Message = e.Message });
             }
             catch (NotFoundException e)
             {

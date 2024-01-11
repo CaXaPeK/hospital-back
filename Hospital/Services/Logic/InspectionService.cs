@@ -6,6 +6,7 @@ using Hospital.Models.Doctor;
 using Hospital.Models.Patient;
 using Microsoft.EntityFrameworkCore;
 using Hospital.Models.Diagnosis;
+using Hospital.Models.Speciality;
 using Hospital.Database.TableModels;
 
 namespace Hospital.Services.Logic
@@ -30,7 +31,6 @@ namespace Hospital.Services.Logic
                     .ThenInclude(c => c.Speciality)
                 .Include(i => i.Consultations)
                     .ThenInclude(c => c.Comments)
-                        .ThenInclude(c => c.Author)
                 .FirstOrDefault(i => i.Id == inspectionId);
 
             if (inspection == null)
@@ -38,8 +38,7 @@ namespace Hospital.Services.Logic
                 throw new NotFoundException($"Inspection with ID {inspectionId} not found in the database");
             }
 
-            var patient = _dbContext.Patients
-                .FirstOrDefault(p => p.Id == inspection.PatientId);
+            var patient = inspection.Patient;
 
             if (patient == null)
             {
@@ -55,8 +54,7 @@ namespace Hospital.Services.Logic
                 Gender = patient.Gender
             };
 
-            var doctor = _dbContext.Doctors
-                .FirstOrDefault(d => d.Id == inspection.DoctorId);
+            var doctor = inspection.Doctor;
 
             if (doctor == null)
             {
@@ -79,40 +77,57 @@ namespace Hospital.Services.Logic
                 {
                     Id = diagnosis.Id,
                     CreateTime = diagnosis.CreateTime,
-                    Code = _dbContext.Diagnoses.First(d => d.Id == diagnosis.IcdDiagnosisId).MkbCode,
-                    Name = _dbContext.Diagnoses.First(d => d.Id == diagnosis.IcdDiagnosisId).MkbName,
+                    Code = diagnosis.IcdDiagnosis.MkbCode,
+                    Name = diagnosis.IcdDiagnosis.MkbName,
                     Description = diagnosis.Description,
                     Type = DiagnosisType.Main
                 })
                 .ToList();
 
-            /*var consultationModels = inspection.Consultations
+            var consultationModels = inspection.Consultations
                 .Select(consultation => new InspectionConsultationModel
                 {
                     Id = consultation.Id,
                     CreateTime = consultation.CreateTime,
                     InspectionId = consultation.InspectionId,
-                    Speciality = 
-                }).ToList();*/
+                    Speciality = new SpecialityModel
+                    {
+                        Id = consultation.Speciality.Id,
+                        CreateTime = consultation.Speciality.CreateDate,
+                        Name = consultation.Speciality.Name
+                    },
+                    RootComment = new InspectionCommentModel
+                    {
+                        Id = consultation.Comments.First(c => c.ParentId == null).Id,
+                        CreateTime = consultation.Comments.First(c => c.ParentId == null).CreateTime,
+                        ParentId = null,
+                        Content = consultation.Comments.First(c => c.ParentId == null).Content,
+                        Author = doctorModel,
+                        ModifyTime = consultation.Comments.First(c => c.ParentId == null).ModifiedDate
+                    },
+                    CommentsNumber = consultation.Comments.Count()
+                }).ToList();
 
             var inspectionModel = new InspectionModel
             {
-
+                Id = inspection.Id,
+                CreateTime = inspection.CreateTime,
+                Date = inspection.Date,
+                Anamnesis = inspection.Anamnesis,
+                Complaints = inspection.Complaints,
+                Treatment = inspection.Treatment,
+                Conclusion = inspection.Conclusion,
+                NextVisitDate = inspection.NextVisitDate,
+                DeathDate = inspection.DeathDate,
+                BaseInspectionId = inspection.BaseInspectionId,
+                PreviousInspectionId = inspection.PreviousInspectionId,
+                Patient = patientModel,
+                Doctor = doctorModel,
+                Diagnoses = diagnosisModels,
+                Consultations = consultationModels
             };
 
             return inspectionModel;
-        }
-        public static DiagnosisModel CreateDiagnosisModel(InspectionDiagnosis diagnosis, Diagnosis icdDiagnosis)
-        {
-            return new DiagnosisModel
-            {
-                Id = diagnosis.Id,
-                CreateTime = diagnosis.CreateTime,
-                Code = icdDiagnosis.MkbCode,
-                Name = icdDiagnosis.MkbName,
-                Description = diagnosis.Description,
-                Type = DiagnosisType.Main
-            };
         }
     }
 }

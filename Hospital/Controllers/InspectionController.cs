@@ -1,5 +1,6 @@
 ﻿using Hospital.Exceptions;
 using Hospital.Models.General;
+using Hospital.Models.Inspection;
 using Hospital.Services.Interfaces;
 using Hospital.Services.Logic;
 using Microsoft.AspNetCore.Authentication;
@@ -21,8 +22,18 @@ namespace Hospital.Controllers
             _tokenService = tokenService;
         }
 
+        /// <summary>
+        /// Get full information about specified inspection
+        /// </summary>
+        /// <param name="id">Inspection's identifier</param>
+        /// <response code="200">Inspection found and successfully extracted</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">InternalServerError</response>
         [HttpGet("{id}")]
         [Authorize]
+        [ProducesResponseType(typeof(InspectionModel), 200)]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
         public async Task<IActionResult> GetFullInspection(Guid id)
         {
             try
