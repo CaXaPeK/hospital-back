@@ -12,6 +12,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Security.Authentication;
 using System.Text.RegularExpressions;
+using Hospital.Models.Comment;
 
 namespace Hospital.Controllers
 {
@@ -120,6 +121,61 @@ namespace Hospital.Controllers
             catch (UnauthorizedAccessException e)
             {
                 return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", Message = e.Message });
+            }
+        }
+
+        /// <summary>
+        /// Add comment to concrete consultation
+        /// </summary>
+        /// <param name="id">Consultation's identifier</param>
+        /// <response code="200">Success</response>
+        /// <response code="400">Invalid arguments</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">User doesn't have add comment to consultation (unsuitable specialty and not the inspection author)</response>
+        /// <response code="404">Consultation or parent comment not found</response>
+        /// <response code="500">InternalServerError</response>
+        [HttpPost("{id}/comment")]
+        [Authorize]
+        [ProducesResponseType(typeof(Guid), 200)]
+        [ProducesResponseType(typeof(ResponseModel), 500)]
+        public async Task<IActionResult> AddComment(Guid id, CommentCreateModel data)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var token = await HttpContext.GetTokenAsync("access_token");
+                _tokenService.ValidateToken(token);
+                var doctorId = _tokenService.GetDoctorId(token);
+
+                var consultation = await _consultationService.AddComment(id, data, doctorId);
+
+                return Ok(consultation);
+            }
+            catch (InvalidCredentialException e)
+            {
+                return BadRequest(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
+            }
+            catch (MethodAccessException e)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    new ResponseModel { Status = "Error", Message = e.Message });
             }
             catch (NotFoundException e)
             {
