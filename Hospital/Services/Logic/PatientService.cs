@@ -18,16 +18,12 @@ namespace Hospital.Services.Logic
     public class PatientService : IPatientService
     {
         private readonly AppDbContext _dbContext;
-        private readonly IDictionaryService _dictionaryService;
         private readonly IInspectionService _inspectionService;
-        private readonly ITokenService _tokenService;
 
-        public PatientService(AppDbContext dbContext, IDictionaryService dictionaryService, IInspectionService inspectionService, ITokenService tokenService)
+        public PatientService(AppDbContext dbContext, IInspectionService inspectionService)
         {
             _dbContext = dbContext;
-            _dictionaryService = dictionaryService;
             _inspectionService = inspectionService;
-            _tokenService = tokenService;
         }
 
         public async Task<Guid> CreatePatient(PatientCreateModel newPatient)
@@ -228,43 +224,7 @@ namespace Hospital.Services.Logic
                 .Where(i => i.Patient == patient)
                 .AsQueryable();
 
-            var filteredInspections = FilterInspections(inspections, icdRoots, grouped);
-
-            var pagedInspections = PaginateInspections(filteredInspections, page, size);
-
-            var pageCount = (int)Math.Ceiling((double)filteredInspections.Count() / size);
-
-            if (page > pageCount && pageCount != 0)
-            {
-                throw new InvalidCredentialException("Invalid page");
-            }
-
-            var list = new InspectionPagedListModel
-            {
-                Inspections = pagedInspections
-                    .Select(inspection => new InspectionPreviewModel
-                    {
-                        Id = inspection.Id,
-                        CreateTime = inspection.CreateTime,
-                        PreviousId = inspection.PreviousInspectionId,
-                        Date = inspection.Date,
-                        Conclusion = inspection.Conclusion,
-                        DoctorId = inspection.DoctorId,
-                        Doctor = _dbContext.Doctors.First(d => d.Id == inspection.DoctorId).Name,
-                        PatientId = inspection.PatientId,
-                        Patient = _dbContext.Patients.First(p => p.Id == inspection.PatientId).Name,
-                        Diagnosis = CreateMainDiagnosisModel(inspection),
-                        HasChain = inspection.PreviousInspectionId == null,
-                        HasNested = inspection.NextInspectionId != null
-                    })
-                    .ToList(),
-                Pagination = new PageInfoModel
-                {
-                    Size = size,
-                    Count = pageCount,
-                    Current = page
-                }
-            };
+            var list = _inspectionService.GetPagedFilteredInspectionList(inspections, icdRoots, grouped, page, size);
 
             return list;
         }
@@ -411,51 +371,10 @@ namespace Hospital.Services.Logic
 
             return patients;
         }
-        private IQueryable<Inspection> FilterInspections(IQueryable<Inspection> inspections, List<Guid> icdRoots, bool grouped)
-        {
-            if (icdRoots.Count != 0)
-            {
-                var icdRootCodes = new List<string>();
-
-                foreach (var diagnosisId in icdRoots)
-                {
-                    var diagnosis = _dbContext.Diagnoses.FirstOrDefault(d => d.Id == diagnosisId);
-
-                    if (diagnosis == null)
-                    {
-                        throw new NotFoundException($"Diagnosis with ID {diagnosisId} not found in the database");
-                    }
-
-                    if (diagnosis.ParentId != null)
-                    {
-                        throw new InvalidCredentialException($"Diagnosis with ID {diagnosisId} is not a root diagnosis");
-                    }
-
-                    icdRootCodes.Add(diagnosis.MkbCode);
-                }
-
-                inspections = inspections
-                    .Where(i => i.Diagnoses.Any(d => d.Type == DiagnosisType.Main
-                            && icdRootCodes.Contains(d.IcdDiagnosis.RootCode)));
-            }
-
-            if (grouped)
-            {
-                inspections = inspections
-                    .Where(i => i.PreviousInspectionId == null);
-            }
-
-            return inspections;
-        }
 
         private IQueryable<Patient> PaginatePatients(IQueryable<Patient> patients, int page, int size)
         {
             return patients.Skip((page - 1) * size).Take(size);
-        }
-
-        private IQueryable<Inspection> PaginateInspections(IQueryable<Inspection> inspections, int page, int size)
-        {
-            return inspections.Skip((page - 1) * size).Take(size);
         }
     }
 }

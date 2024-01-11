@@ -9,6 +9,10 @@ using Hospital.Models.Diagnosis;
 using Hospital.Models.Speciality;
 using Hospital.Database.TableModels;
 using System.Security.Authentication;
+using Hospital.Models.General;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Drawing;
+using System.Text.RegularExpressions;
 
 namespace Hospital.Services.Logic
 {
@@ -229,8 +233,49 @@ namespace Hospital.Services.Logic
                     HasNested = inspection.NextInspectionId != null
                 });
             }
-
             return inspectionChain;
+        }
+        public InspectionPagedListModel GetPagedFilteredInspectionList(IQueryable<Inspection> inspections, List<Guid> icdRoots, bool grouped, int page, int size)
+        {
+            var filteredInspections = FilterInspections(inspections, icdRoots, grouped);
+
+            var pagedInspections = PaginateInspections(filteredInspections, page, size);
+
+            var pageCount = (int)Math.Ceiling((double)filteredInspections.Count() / size);
+
+            if (page > pageCount && pageCount != 0)
+            {
+                throw new InvalidCredentialException("Invalid page");
+            }
+
+            var list = new InspectionPagedListModel
+            {
+                Inspections = pagedInspections
+                    .Select(inspection => new InspectionPreviewModel
+                    {
+                        Id = inspection.Id,
+                        CreateTime = inspection.CreateTime,
+                        PreviousId = inspection.PreviousInspectionId,
+                        Date = inspection.Date,
+                        Conclusion = inspection.Conclusion,
+                        DoctorId = inspection.DoctorId,
+                        Doctor = _dbContext.Doctors.First(d => d.Id == inspection.DoctorId).Name,
+                        PatientId = inspection.PatientId,
+                        Patient = _dbContext.Patients.First(p => p.Id == inspection.PatientId).Name,
+                        Diagnosis = CreateMainDiagnosisModel(inspection),
+                        HasChain = inspection.PreviousInspectionId == null,
+                        HasNested = inspection.NextInspectionId != null
+                    })
+                    .ToList(),
+                Pagination = new PageInfoModel
+                {
+                    Size = size,
+                    Count = pageCount,
+                    Current = page
+                }
+            };
+
+            return list;
         }
 
         private static DiagnosisModel CreateMainDiagnosisModel(Inspection inspection)
@@ -382,6 +427,48 @@ namespace Hospital.Services.Logic
         {
             return patient.Inspections
                 .Any(i => i.Conclusion == Conclusion.Death);
+        }
+
+        public IQueryable<Inspection> FilterInspections(IQueryable<Inspection> inspections, List<Guid> icdRoots, bool grouped)
+        {
+            if (icdRoots.Count != 0)
+            {
+                var icdRootCodes = new List<string>();
+
+                foreach (var diagnosisId in icdRoots)
+                {
+                    var diagnosis = _dbContext.Diagnoses.FirstOrDefault(d => d.Id == diagnosisId);
+
+                    if (diagnosis == null)
+                    {
+                        throw new NotFoundException($"Diagnosis with ID {diagnosisId} not found in the database");
+                    }
+
+                    if (diagnosis.ParentId != null)
+                    {
+                        throw new InvalidCredentialException($"Diagnosis with ID {diagnosisId} is not a root diagnosis");
+                    }
+
+                    icdRootCodes.Add(diagnosis.MkbCode);
+                }
+
+                inspections = inspections
+                    .Where(i => i.Diagnoses.Any(d => d.Type == DiagnosisType.Main
+                            && icdRootCodes.Contains(d.IcdDiagnosis.RootCode)));
+            }
+
+            if (grouped)
+            {
+                inspections = inspections
+                    .Where(i => i.PreviousInspectionId == null);
+            }
+
+            return inspections;
+        }
+
+        public IQueryable<Inspection> PaginateInspections(IQueryable<Inspection> inspections, int page, int size)
+        {
+            return inspections.Skip((page - 1) * size).Take(size);
         }
     }
 }
