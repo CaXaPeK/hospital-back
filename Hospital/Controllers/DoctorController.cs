@@ -188,6 +188,10 @@ namespace Hospital.Controllers
 
                 return Ok();
             }
+            catch (InvalidCredentialException e)
+            {
+                return BadRequest(new ResponseModel { Status = "Error", Message = e.Message });
+            }
             catch (UnauthorizedAccessException e)
             {
                 return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });

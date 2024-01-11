@@ -62,7 +62,7 @@ namespace Hospital.Services.Logic
             var patient = _dbContext.Patients
                 .AsQueryable();
 
-            var filteredPatients = ApplyPatientFilters(patient, name, conclusions, sorting, scheduledVisits, onlyMine, doctorId);
+            var filteredPatients = FilterPatients(patient, name, conclusions, sorting, scheduledVisits, onlyMine, doctorId);
 
             var pagedPatients = PaginatePatients(filteredPatients, page, size);
 
@@ -70,7 +70,7 @@ namespace Hospital.Services.Logic
 
             if (page > pageCount && pageCount != 0)
             {
-                throw new InvalidOperationException("Invalid page");
+                throw new InvalidCredentialException("Invalid page");
             }
 
             var list = new PatientPagedListModel
@@ -228,7 +228,7 @@ namespace Hospital.Services.Logic
                 .Where(i => i.Patient == patient)
                 .AsQueryable();
 
-            var filteredInspections = ApplyInspectionFilters(inspections, icdRoots, grouped);
+            var filteredInspections = FilterInspections(inspections, icdRoots, grouped);
 
             var pagedInspections = PaginateInspections(filteredInspections, page, size);
 
@@ -236,7 +236,7 @@ namespace Hospital.Services.Logic
 
             if (page > pageCount && pageCount != 0)
             {
-                throw new InvalidOperationException("Invalid page");
+                throw new InvalidCredentialException("Invalid page");
             }
 
             var list = new InspectionPagedListModel
@@ -350,7 +350,7 @@ namespace Hospital.Services.Logic
                 || diagnosis.MkbCode.ToLower().Contains(request.ToLower());
         }
 
-        private IQueryable<Patient> ApplyPatientFilters(
+        private IQueryable<Patient> FilterPatients(
             IQueryable<Patient> patients,
             string? name,
             List<Conclusion>? conclusions,
@@ -411,7 +411,7 @@ namespace Hospital.Services.Logic
 
             return patients;
         }
-        private IQueryable<Inspection> ApplyInspectionFilters(IQueryable<Inspection> inspections, List<Guid> icdRoots, bool grouped)
+        private IQueryable<Inspection> FilterInspections(IQueryable<Inspection> inspections, List<Guid> icdRoots, bool grouped)
         {
             if (icdRoots.Count != 0)
             {
@@ -428,7 +428,7 @@ namespace Hospital.Services.Logic
 
                     if (diagnosis.ParentId != null)
                     {
-                        throw new InvalidOperationException($"Diagnosis with ID {diagnosisId} is not a root diagnosis");
+                        throw new InvalidCredentialException($"Diagnosis with ID {diagnosisId} is not a root diagnosis");
                     }
 
                     icdRootCodes.Add(diagnosis.MkbCode);

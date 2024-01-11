@@ -193,7 +193,7 @@ namespace Hospital.Services.Logic
 
             if (rootInspection.PreviousInspectionId != null)
             {
-                throw new InvalidOperationException($"Inspection with ID {rootId} is not a root inspection");
+                throw new InvalidCredentialException($"Inspection with ID {rootId} is not a root inspection");
             }
 
             //в вашем API в таком случае выводится пустой список

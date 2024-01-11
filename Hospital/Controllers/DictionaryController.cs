@@ -6,6 +6,7 @@ using Hospital.Models.General;
 using Hospital.Models.Speciality;
 using System.ComponentModel;
 using Hospital.Models.Icd;
+using System.Security.Authentication;
 
 namespace Hospital.Controllers
 {
@@ -48,7 +49,7 @@ namespace Hospital.Controllers
                 var list = await _dictionaryService.GetSpecialitiesList(name, page, size);
                 return Ok(list);
             }
-            catch (InvalidOperationException e)
+            catch (InvalidCredentialException e)
             {
                 return BadRequest(new ResponseModel { Status = "Error", Message = e.Message });
             }
@@ -87,7 +88,7 @@ namespace Hospital.Controllers
                 var list = await _dictionaryService.GetDiagnosesList(request, page, size);
                 return Ok(list);
             }
-            catch (InvalidOperationException e)
+            catch (InvalidCredentialException e)
             {
                 return BadRequest(new ResponseModel { Status = "Error", Message = e.Message });
             }

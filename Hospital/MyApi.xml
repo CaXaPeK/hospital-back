@@ -98,6 +98,17 @@
             <response code="404">Not Found</response>
             <response code="500">InternalServerError</response>
         </member>
+        <member name="M:Hospital.Controllers.InspectionController.GetInspectionChain(System.Guid)">
+            <summary>
+            Get medical inspection chain for root inspection
+            </summary>
+            <param name="id">Root inspection's identifier</param>
+            <response code="200">Success</response>
+            <response code="400">Bad Request</response>
+            <response code="401">Unauthorized</response>
+            <response code="404">Not Found</response>
+            <response code="500">InternalServerError</response>
+        </member>
         <member name="M:Hospital.Controllers.PatientController.CreatePatient(Hospital.Models.Patient.PatientCreateModel)">
             <summary>
             Create new patient
