@@ -433,24 +433,7 @@ namespace Hospital.Services.Logic
         {
             if (icdRoots.Count != 0)
             {
-                var icdRootCodes = new List<string>();
-
-                foreach (var diagnosisId in icdRoots)
-                {
-                    var diagnosis = _dbContext.Diagnoses.FirstOrDefault(d => d.Id == diagnosisId);
-
-                    if (diagnosis == null)
-                    {
-                        throw new NotFoundException($"Diagnosis with ID {diagnosisId} not found in the database");
-                    }
-
-                    if (diagnosis.ParentId != null)
-                    {
-                        throw new InvalidCredentialException($"Diagnosis with ID {diagnosisId} is not a root diagnosis");
-                    }
-
-                    icdRootCodes.Add(diagnosis.MkbCode);
-                }
+                var icdRootCodes = GetIcdRootCodes(icdRoots.Distinct().ToList());
 
                 inspections = inspections
                     .Where(i => i.Diagnoses.Any(d => d.Type == DiagnosisType.Main
@@ -464,6 +447,30 @@ namespace Hospital.Services.Logic
             }
 
             return inspections;
+        }
+
+        public List<string> GetIcdRootCodes(List<Guid> icdRoots)
+        {
+            var icdRootCodes = new List<string>();
+
+            foreach (var diagnosisId in icdRoots)
+            {
+                var diagnosis = _dbContext.Diagnoses.FirstOrDefault(d => d.Id == diagnosisId);
+
+                if (diagnosis == null)
+                {
+                    throw new NotFoundException($"Diagnosis with ID {diagnosisId} not found in the database");
+                }
+
+                if (diagnosis.ParentId != null)
+                {
+                    throw new InvalidCredentialException($"Diagnosis with ID {diagnosisId} is not a root diagnosis");
+                }
+
+                icdRootCodes.Add(diagnosis.MkbCode);
+            }
+
+            return icdRootCodes;
         }
 
         public IQueryable<Inspection> PaginateInspections(IQueryable<Inspection> inspections, int page, int size)

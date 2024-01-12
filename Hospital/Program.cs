@@ -59,6 +59,7 @@ namespace Hospital
             builder.Services.AddScoped<IDoctorService, DoctorService>();
             builder.Services.AddScoped<IInspectionService, InspectionService>();
             builder.Services.AddScoped<IPatientService, PatientService>();
+            builder.Services.AddScoped<IReportService, ReportService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
 
             builder.Services.AddAuthorization(options => options.DefaultPolicy =
