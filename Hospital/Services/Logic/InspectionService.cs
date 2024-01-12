@@ -1,7 +1,6 @@
 ﻿using Hospital.Database;
 using Hospital.Models.Inspection;
 using Hospital.Services.Interfaces;
-using Hospital.Exceptions;
 using Hospital.Models.Doctor;
 using Hospital.Models.Patient;
 using Microsoft.EntityFrameworkCore;
@@ -42,14 +41,14 @@ namespace Hospital.Services.Logic
 
             if (inspection == null)
             {
-                throw new NotFoundException($"Inspection with ID {inspectionId} not found in the database");
+                throw new KeyNotFoundException($"Inspection with ID {inspectionId} not found in the database");
             }
 
             var patient = inspection.Patient;
 
             if (patient == null)
             {
-                throw new NotFoundException($"Inspection's patient with ID {inspection.PatientId} not found in the database");
+                throw new KeyNotFoundException($"Inspection's patient with ID {inspection.PatientId} not found in the database");
             }
 
             var patientModel = new PatientModel
@@ -65,7 +64,7 @@ namespace Hospital.Services.Logic
 
             if (doctor == null)
             {
-                throw new NotFoundException($"Inspection's doctor with ID {inspection.DoctorId} not found in the database");
+                throw new KeyNotFoundException($"Inspection's doctor with ID {inspection.DoctorId} not found in the database");
             }
 
             var doctorModel = new DoctorModel
@@ -145,7 +144,7 @@ namespace Hospital.Services.Logic
 
             if (inspection == null)
             {
-                throw new NotFoundException($"Inspection with ID {inspectionId} not found in the database");
+                throw new KeyNotFoundException($"Inspection with ID {inspectionId} not found in the database");
             }
 
             if (inspection.DoctorId != doctorId)
@@ -192,7 +191,7 @@ namespace Hospital.Services.Logic
 
             if (rootInspection == null)
             {
-                throw new NotFoundException($"Inspection with ID {rootId} not found in the database");
+                throw new KeyNotFoundException($"Inspection with ID {rootId} not found in the database");
             }
 
             if (rootInspection.PreviousInspectionId != null)
@@ -203,7 +202,7 @@ namespace Hospital.Services.Logic
             //в вашем API в таком случае выводится пустой список
             /*if (rootInspection.PreviousInspectionId == null && rootInspection.NextInspectionId == null)
             {
-                throw new NotFoundException($"Inspection with ID {rootId} doesn't have a chain");
+                throw new KeyNotFoundException($"Inspection with ID {rootId} doesn't have a chain");
             }*/
 
             var inspection = rootInspection;
@@ -310,7 +309,7 @@ namespace Hospital.Services.Logic
 
                 if (previousInspection == null)
                 {
-                    throw new NotFoundException($"Previous inspection with ID {newInspection.PreviousInspectionId.Value} not found in the database");
+                    throw new KeyNotFoundException($"Previous inspection with ID {newInspection.PreviousInspectionId.Value} not found in the database");
                 }
 
                 if (previousInspection.Patient != patient)
@@ -348,7 +347,7 @@ namespace Hospital.Services.Logic
             {
                 if (!_dictionaryService.DiagnosisExists(diagnosis.IcdDiagnosisId))
                 {
-                    throw new NotFoundException($"Diagnosis with ID {diagnosis.IcdDiagnosisId} not found in the database");
+                    throw new KeyNotFoundException($"Diagnosis with ID {diagnosis.IcdDiagnosisId} not found in the database");
                 }
             }
         }
@@ -459,7 +458,7 @@ namespace Hospital.Services.Logic
 
                 if (diagnosis == null)
                 {
-                    throw new NotFoundException($"Diagnosis with ID {diagnosisId} not found in the database");
+                    throw new KeyNotFoundException($"Diagnosis with ID {diagnosisId} not found in the database");
                 }
 
                 if (diagnosis.ParentId != null)

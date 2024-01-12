@@ -4,7 +4,6 @@ using Hospital.Models.General;
 using Hospital.Database.TableModels;
 using Hospital.Models.Speciality;
 using Hospital.Services.Interfaces;
-using Hospital.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Authentication;
 using System.Text;
@@ -83,7 +82,7 @@ namespace Hospital.Services.Logic
 
             if (doctor == null)
             {
-                throw new NotFoundException("Doctor not found");
+                throw new KeyNotFoundException("Doctor not found");
             }
 
             var profile = new DoctorModel
@@ -106,7 +105,7 @@ namespace Hospital.Services.Logic
 
             if (doctor == null)
             {
-                throw new NotFoundException("Doctor not found");
+                throw new KeyNotFoundException("Doctor not found");
             }
 
             if (!IsEmailUnique(editedDoctor.Email) && doctor.Email != editedDoctor.Email)

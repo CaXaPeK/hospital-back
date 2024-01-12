@@ -1,5 +1,4 @@
-﻿using Hospital.Exceptions;
-using Hospital.Models.General;
+﻿using Hospital.Models.General;
 using Hospital.Models.Icd;
 using Hospital.Models.Patient;
 using Hospital.Services.Interfaces;
@@ -69,7 +68,7 @@ namespace Hospital.Controllers
             {
                 return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
             }
-            catch (NotFoundException e)
+            catch (KeyNotFoundException e)
             {
                 return NotFound(new ResponseModel { Status = "Error", Message = e.Message });
             }
