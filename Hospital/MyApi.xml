@@ -231,6 +231,19 @@
             <response code="404">Not Found</response>
             <response code="500">InternalServerError</response>
         </member>
+        <member name="M:Hospital.Controllers.ReportController.GetIcdRootsReport(System.DateTime,System.DateTime,System.Collections.Generic.List{System.Guid})">
+            <summary>
+            Get a report on patients' visits based on ICD-10 roots for a specified time interval
+            </summary>
+            <param name="start">Start of tome interval</param>
+            <param name="end">End of time interval</param>
+            <param name="icdRoots">Set of ICD-10 roots. All possible roots if null</param>
+            <response code="200">Report extracted successfully</response>
+            <response code="400">Some fields in request are invalid</response>
+            <response code="401">No authentication data in request</response>
+            <response code="404">Diagnosis not found</response>
+            <response code="500">InternalServerError</response>
+        </member>
         <member name="T:Hospital.Migrations.Init">
             <inheritdoc />
         </member>

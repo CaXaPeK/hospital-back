@@ -19,5 +19,7 @@ namespace Hospital.Services.Interfaces
         IQueryable<Inspection> PaginateInspections(IQueryable<Inspection> inspections, int page, int size);
 
         InspectionPagedListModel GetPagedFilteredInspectionList(IQueryable<Inspection> inspections, List<Guid> icdRoots, bool grouped, int page, int size);
+
+        List<string> GetIcdRootCodes(List<Guid> icdRoots);
     }
 }

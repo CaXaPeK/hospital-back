@@ -6,6 +6,6 @@
 
         public DateTime End { get; set; }
 
-        public List<string>? Roots { get; set; }
+        public List<string>? IcdRoots { get; set; }
     }
 }
