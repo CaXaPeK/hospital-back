@@ -9,7 +9,6 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Hospital.Services.Logic;
-using Hospital.Exceptions;
 
 namespace Hospital.Controllers
 {
@@ -149,7 +148,7 @@ namespace Hospital.Controllers
             {
                 return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
             }
-            catch (NotFoundException e)
+            catch (KeyNotFoundException e)
             {
                 return NotFound(new ResponseModel { Status = "Error", Message = e.Message });
             }
@@ -196,7 +195,7 @@ namespace Hospital.Controllers
             {
                 return Unauthorized(new ResponseModel { Status = "Error", Message = e.Message });
             }
-            catch (NotFoundException e)
+            catch (KeyNotFoundException e)
             {
                 return NotFound(new ResponseModel { Status = "Error", Message = e.Message });
             }

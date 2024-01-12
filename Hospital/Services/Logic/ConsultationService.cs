@@ -1,6 +1,5 @@
 ﻿using Hospital.Database;
 using Hospital.Database.TableModels;
-using Hospital.Exceptions;
 using Hospital.Models.Comment;
 using Hospital.Models.Consultation;
 using Hospital.Models.General;
@@ -51,7 +50,7 @@ namespace Hospital.Services.Logic
 
             if (consultation == null)
             {
-                throw new NotFoundException($"Consultation with ID {id} not found in the database");
+                throw new KeyNotFoundException($"Consultation with ID {id} not found in the database");
             }
 
             var consultationModel = new ConsultationModel
@@ -89,7 +88,7 @@ namespace Hospital.Services.Logic
 
             if (consultation == null)
             {
-                throw new NotFoundException($"Parent comment with ID {consultationId} not found in the database");
+                throw new KeyNotFoundException($"Parent comment with ID {consultationId} not found in the database");
             }
 
             var parentComment = _dbContext.Comments
@@ -97,7 +96,7 @@ namespace Hospital.Services.Logic
 
             if (parentComment == null)
             {
-                throw new NotFoundException($"Parent comment with ID {newComment.ParentId} not found in the database");
+                throw new KeyNotFoundException($"Parent comment with ID {newComment.ParentId} not found in the database");
             }
 
             var doctor = _dbContext.Doctors
@@ -135,7 +134,7 @@ namespace Hospital.Services.Logic
 
             if (comment == null)
             {
-                throw new NotFoundException($"Comment with ID {commentId} not found in the database");
+                throw new KeyNotFoundException($"Comment with ID {commentId} not found in the database");
             }
 
             if (comment.AuthorId != doctorId)

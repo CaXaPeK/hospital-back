@@ -1,6 +1,5 @@
 ﻿using Hospital.Database;
 using Hospital.Database.TableModels;
-using Hospital.Exceptions;
 using Hospital.Models.Diagnosis;
 using Hospital.Models.General;
 using Hospital.Models.Icd;
@@ -100,7 +99,7 @@ namespace Hospital.Services.Logic
 
             if (patient == null)
             {
-                throw new NotFoundException($"Patient with ID {patientId} not found in the database");
+                throw new KeyNotFoundException($"Patient with ID {patientId} not found in the database");
             }
 
             _inspectionService.ValidateCreateInspection(newInspection, patient);
@@ -216,7 +215,7 @@ namespace Hospital.Services.Logic
 
             if (patient == null)
             {
-                throw new NotFoundException($"Patient with ID {patientId} not found in the database");
+                throw new KeyNotFoundException($"Patient with ID {patientId} not found in the database");
             }
 
             var inspections = _dbContext.Inspections
@@ -236,7 +235,7 @@ namespace Hospital.Services.Logic
 
             if (patient == null)
             {
-                throw new NotFoundException($"Patient with ID {id} not found in database");
+                throw new KeyNotFoundException($"Patient with ID {id} not found in database");
             }
 
             var patientCard = new PatientModel
@@ -257,7 +256,7 @@ namespace Hospital.Services.Logic
 
             if (patient == null)
             {
-                throw new NotFoundException($"Patient with ID {patientId} not found in the database");
+                throw new KeyNotFoundException($"Patient with ID {patientId} not found in the database");
             }
 
             var inspections = _dbContext.Inspections
