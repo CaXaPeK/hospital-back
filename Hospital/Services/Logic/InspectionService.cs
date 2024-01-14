@@ -228,7 +228,7 @@ namespace Hospital.Services.Logic
                     PatientId = inspection.PatientId,
                     Patient = inspection.Patient.Name,
                     Diagnosis = CreateMainDiagnosisModel(inspection),
-                    HasChain = inspection.PreviousInspectionId == null,
+                    HasChain = inspection.PreviousInspectionId == null && inspection.NextInspectionId != null,
                     HasNested = inspection.NextInspectionId != null
                 });
             }
@@ -262,7 +262,7 @@ namespace Hospital.Services.Logic
                         PatientId = inspection.PatientId,
                         Patient = _dbContext.Patients.First(p => p.Id == inspection.PatientId).Name,
                         Diagnosis = CreateMainDiagnosisModel(inspection),
-                        HasChain = inspection.PreviousInspectionId == null,
+                        HasChain = inspection.PreviousInspectionId == null && inspection.NextInspectionId != null,
                         HasNested = inspection.NextInspectionId != null
                     })
                     .ToList(),
